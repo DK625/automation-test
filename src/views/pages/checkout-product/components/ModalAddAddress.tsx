@@ -88,7 +88,7 @@ const ModalAddAddress = (props: TModalAddAddress) => {
 
   const schema = yup.object().shape({
     fullName: yup.string().required(t('Required_field')),
-    phoneNumber: yup.string().required(t('Required_field')).min(9, 'The phone number is min 9 number'),
+    phoneNumber: yup.string().required(t('Required_field')).min(9, 'Số điện thoại tối thiểu là 9 số'),
     city: yup.string().required(t('Required_field')),
     address: yup.string().required(t('Required_field'))
   })
