@@ -1,26 +1,11 @@
-# Selenium WebDriver - thư viện chính để automation test
 selenium==4.16.0
-
-# Pytest - framework để viết và chạy test
 pytest==7.4.3
-pytest-html==4.1.1  # để tạo report dạng HTML
-pytest-xdist==3.5.0  # để chạy parallel test
-
-# WebDriver Manager - tự động download và quản lý WebDriver
+pytest-html==4.1.1
+pytest-xdist==3.5.0
 webdriver-manager==4.0.1
-
-# Để hỗ trợ assertion tốt hơn
 assertpy==1.1
-
-# Để xử lý timeout tốt hơn
 timeout-decorator==0.5.0
-
-# Để log test results
 pytest-reportlog==0.3.0
-
-# Để generate test report đẹp hơn
 allure-pytest==2.13.2
-
-# Thư viện hỗ trợ
-requests==2.31.0  # để gọi API nếu cần
-python-dotenv==1.0.0  # để quản lý environment variables
+requests==2.31.0
+python-dotenv==1.0.0
