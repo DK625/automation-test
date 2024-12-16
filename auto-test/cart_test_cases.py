@@ -47,9 +47,9 @@ class TestCart():
         else:
             self.driver.execute_script(f"window.localStorage.setItem('productCart', 'b');")
 
-    def test_add_product_to_cart(self):
+    def login(self):
         self.driver.get("http://localhost:3000/home")
-        self.driver.set_window_size(962, 1089)
+        self.driver.maximize_window()
 
         # Click vào nút đăng nhập và chờ form login
         login_button = WebDriverWait(self.driver, 30).until(
@@ -57,15 +57,15 @@ class TestCart():
         )
         login_button.click()
 
-        # Nhập email
+        # Nhập email - using MUI TextField selector
         email_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.ID, ":re:"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[aria-invalid='false']"))
         )
         email_input.send_keys("doanthuyduong2103@gmail.com")
 
-        # Nhập password và submit
+        # Nhập password - using MUI TextField selector with type='password'
         password_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.ID, ":rf:"))
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[type='password']"))
         )
         password_input.send_keys("Thanhthuy2103@")
 
@@ -74,6 +74,8 @@ class TestCart():
         )
         submit_button.click()
 
+    def test_add_product_to_cart(self):
+        self.login()
         cart_icon = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--flowbite > path"))
         )
@@ -379,7 +381,8 @@ class TestCart():
 
         # Lấy tổng tiền hiển thị trên UI
         total_text = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-c78xqc-MuiTypography-root"))
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-c78xqc-MuiTypography-root"))
         ).text
         actual_total = int(total_text.replace('.', '').replace(' VND', ''))
 
