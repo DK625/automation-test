@@ -117,8 +117,8 @@ class MongoSync:
             databases = self.get_database_names()
 
             # Bỏ qua các database hệ thống
-            # system_dbs = ['admin', 'local', 'config']
-            system_dbs = []
+            system_dbs = ['admin', 'local', 'config']
+            # system_dbs = []
             databases = [db for db in databases if db not in system_dbs]
 
             self.logger.info(f"Starting synchronization of {len(databases)} databases")
@@ -137,7 +137,7 @@ class MongoSync:
 
 def main():
     # Cấu hình URI kết nối
-    CLOUD_URI = "mongodb+srv://Admin:123456789Kha%40@cluster0.nmxwx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+    CLOUD_URI = "mongodb+srv://doanthuyduong2103:848gX06W03GibVG6@cluster0.2n3ie.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
     LOCAL_URI = "mongodb://localhost:27017/"
 
     # Khởi tạo đối tượng sync
