@@ -1,0 +1,61 @@
+2024-12-15 16:08:50,500 - INFO - Successfully connected to both Cloud and Local MongoDB
+2024-12-15 16:12:30,387 - INFO - Successfully connected to both Cloud and Local MongoDB
+2024-12-15 16:12:35,796 - INFO - Starting synchronization of 1 databases
+2024-12-15 16:12:36,709 - INFO - Starting synchronization of database test
+2024-12-15 16:12:50,067 - INFO - Syncing collection users (69 documents)
+2024-12-15 16:12:51,601 - INFO - Successfully synchronized collection users
+2024-12-15 16:12:53,373 - INFO - Syncing collection reviews (3 documents)
+2024-12-15 16:12:53,431 - INFO - Successfully synchronized collection reviews
+2024-12-15 16:12:55,400 - INFO - Syncing collection comments (42 documents)
+2024-12-15 16:12:55,524 - INFO - Successfully synchronized collection comments
+2024-12-15 16:12:56,893 - INFO - Syncing collection roles (2 documents)
+2024-12-15 16:12:56,952 - INFO - Successfully synchronized collection roles
+2024-12-15 16:12:56,979 - INFO - Syncing collection producttypes (4 documents)
+2024-12-15 16:12:57,046 - INFO - Successfully synchronized collection producttypes
+2024-12-15 16:12:57,073 - INFO - Syncing collection orders (158 documents)
+2024-12-15 16:13:27,912 - INFO - Successfully synchronized collection orders
+2024-12-15 16:13:33,602 - INFO - Syncing collection notifications (378 documents)
+2024-12-15 16:13:34,254 - INFO - Successfully synchronized collection notifications
+2024-12-15 16:13:38,714 - INFO - Syncing collection paymenttypes (2 documents)
+2024-12-15 16:13:38,798 - INFO - Successfully synchronized collection paymenttypes
+2024-12-15 16:13:39,456 - INFO - Syncing collection deliverytypes (2 documents)
+2024-12-15 16:13:39,525 - INFO - Successfully synchronized collection deliverytypes
+2024-12-15 16:13:40,052 - INFO - Syncing collection products (12 documents)
+2024-12-15 16:13:41,762 - INFO - Successfully synchronized collection products
+2024-12-15 16:13:42,742 - INFO - Syncing collection cities (63 documents)
+2024-12-15 16:13:42,921 - INFO - Successfully synchronized collection cities
+2024-12-15 16:13:42,921 - INFO - Completed synchronization of database test
+2024-12-15 16:13:42,922 - INFO - Completed synchronization of all databases
+2024-12-15 16:19:36,331 - INFO - Successfully connected to both Cloud and Local MongoDB
+2024-12-15 16:19:36,763 - INFO - Starting synchronization of 3 databases
+2024-12-15 16:19:36,786 - INFO - Starting synchronization of database test
+2024-12-15 16:19:36,810 - INFO - Syncing collection users (69 documents)
+2024-12-15 16:19:38,105 - INFO - Successfully synchronized collection users
+2024-12-15 16:19:38,127 - INFO - Syncing collection reviews (3 documents)
+2024-12-15 16:19:38,182 - INFO - Successfully synchronized collection reviews
+2024-12-15 16:19:38,205 - INFO - Syncing collection comments (42 documents)
+2024-12-15 16:19:38,302 - INFO - Successfully synchronized collection comments
+2024-12-15 16:19:38,325 - INFO - Syncing collection roles (2 documents)
+2024-12-15 16:19:38,373 - INFO - Successfully synchronized collection roles
+2024-12-15 16:19:38,396 - INFO - Syncing collection producttypes (4 documents)
+2024-12-15 16:19:38,459 - INFO - Successfully synchronized collection producttypes
+2024-12-15 16:19:38,482 - INFO - Syncing collection orders (158 documents)
+2024-12-15 16:20:05,778 - INFO - Successfully synchronized collection orders
+2024-12-15 16:20:05,804 - INFO - Syncing collection notifications (378 documents)
+2024-12-15 16:20:06,424 - INFO - Successfully synchronized collection notifications
+2024-12-15 16:20:06,449 - INFO - Syncing collection paymenttypes (2 documents)
+2024-12-15 16:20:06,496 - INFO - Successfully synchronized collection paymenttypes
+2024-12-15 16:20:06,519 - INFO - Syncing collection deliverytypes (2 documents)
+2024-12-15 16:20:06,571 - INFO - Successfully synchronized collection deliverytypes
+2024-12-15 16:20:06,594 - INFO - Syncing collection products (12 documents)
+2024-12-15 16:20:08,026 - INFO - Successfully synchronized collection products
+2024-12-15 16:20:08,048 - INFO - Syncing collection cities (63 documents)
+2024-12-15 16:20:08,196 - INFO - Successfully synchronized collection cities
+2024-12-15 16:20:08,196 - INFO - Completed synchronization of database test
+2024-12-15 16:20:08,228 - INFO - Starting synchronization of database admin
+2024-12-15 16:20:08,229 - INFO - Completed synchronization of database admin
+2024-12-15 16:20:08,250 - INFO - Starting synchronization of database local
+2024-12-15 16:20:17,886 - INFO - Syncing collection oplog.rs (953 documents)
+2024-12-15 16:20:17,911 - ERROR - Error syncing collection oplog.rs: (Unauthorized) not authorized on local to execute command { listIndexes: "oplog.rs", cursor: {  }, lsid: { id: {4 [235 67 158 136 100 90 79 218 153 210 183 232 121 10 167 244]} }, $clusterTime: { clusterTime: {1734254409 1}, signature: { hash: {0 [83 200 183 249 150 180 144 76 77 62 56 171 67 172 242 86 148 162 243 119]}, keyId: 7401528196442619904.000000 } }, $db: "local" }, full error: SON([('ok', 0), ('errmsg', '(Unauthorized) not authorized on local to execute command { listIndexes: "oplog.rs", cursor: {  }, lsid: { id: {4 [235 67 158 136 100 90 79 218 153 210 183 232 121 10 167 244]} }, $clusterTime: { clusterTime: {1734254409 1}, signature: { hash: {0 [83 200 183 249 150 180 144 76 77 62 56 171 67 172 242 86 148 162 243 119]}, keyId: 7401528196442619904.000000 } }, $db: "local" }'), ('code', 8000), ('codeName', 'AtlasError')])
+2024-12-15 16:20:17,912 - ERROR - Error syncing database local: (Unauthorized) not authorized on local to execute command { listIndexes: "oplog.rs", cursor: {  }, lsid: { id: {4 [235 67 158 136 100 90 79 218 153 210 183 232 121 10 167 244]} }, $clusterTime: { clusterTime: {1734254409 1}, signature: { hash: {0 [83 200 183 249 150 180 144 76 77 62 56 171 67 172 242 86 148 162 243 119]}, keyId: 7401528196442619904.000000 } }, $db: "local" }, full error: SON([('ok', 0), ('errmsg', '(Unauthorized) not authorized on local to execute command { listIndexes: "oplog.rs", cursor: {  }, lsid: { id: {4 [235 67 158 136 100 90 79 218 153 210 183 232 121 10 167 244]} }, $clusterTime: { clusterTime: {1734254409 1}, signature: { hash: {0 [83 200 183 249 150 180 144 76 77 62 56 171 67 172 242 86 148 162 243 119]}, keyId: 7401528196442619904.000000 } }, $db: "local" }'), ('code', 8000), ('codeName', 'AtlasError')])
+2024-12-15 16:20:17,913 - ERROR - Error during synchronization process: (Unauthorized) not authorized on local to execute command { listIndexes: "oplog.rs", cursor: {  }, lsid: { id: {4 [235 67 158 136 100 90 79 218 153 210 183 232 121 10 167 244]} }, $clusterTime: { clusterTime: {1734254409 1}, signature: { hash: {0 [83 200 183 249 150 180 144 76 77 62 56 171 67 172 242 86 148 162 243 119]}, keyId: 7401528196442619904.000000 } }, $db: "local" }, full error: SON([('ok', 0), ('errmsg', '(Unauthorized) not authorized on local to execute command { listIndexes: "oplog.rs", cursor: {  }, lsid: { id: {4 [235 67 158 136 100 90 79 218 153 210 183 232 121 10 167 244]} }, $clusterTime: { clusterTime: {1734254409 1}, signature: { hash: {0 [83 200 183 249 150 180 144 76 77 62 56 171 67 172 242 86 148 162 243 119]}, keyId: 7401528196442619904.000000 } }, $db: "local" }'), ('code', 8000), ('codeName', 'AtlasError')])
