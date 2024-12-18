@@ -225,7 +225,8 @@ class TestPurchase():
         assert len(error_messages) >= 3, "Expected at least 3 error messages for required fields"
 
         # Verify specific error messages
-        expected_errors = ["Trường này bắt buộc", "Trường này bắt buộc", "Số điện thoại tối thiểu là 9 số"]
+        # expected_errors = ["Trường này bắt buộc", "Trường này bắt buộc", "Số điện thoại tối thiểu là 9 số"]
+        expected_errors = ["Trường này bắt buộc", "Trường này bắt buộc", "The phone number is min 9 number"]
         actual_errors = [message.text for message in error_messages]
 
         for expected in expected_errors:
@@ -353,6 +354,10 @@ class TestPurchase():
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".MuiFormControlLabel-root:nth-child(2) .PrivateSwitchBase-input").click() #change shoppe method
         self.driver.find_element(By.NAME, "radio-delivery-group").click() #change method
+        self.driver.find_element(By.CSS_SELECTOR, ".MuiButton-contained").click() # order
+        self.driver.find_element(By.CSS_SELECTOR, ".swal2-confirm").click() # confirm
+        self.driver.find_element(By.CSS_SELECTOR,
+                                 ".MuiBox-root:nth-child(1) > .MuiBox-root > .MuiBox-root:nth-child(1) .MuiTypography-root:nth-child(3)").click()
         print("""
                 TEST CASE: Validate Empty Shipping Address Fields
 

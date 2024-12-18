@@ -138,7 +138,8 @@ class MongoSync:
 def main():
     # Cấu hình URI kết nối
     CLOUD_URI = "mongodb+srv://doanthuyduong2103:848gX06W03GibVG6@cluster0.2n3ie.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
-    LOCAL_URI = "mongodb://localhost:27017/"
+    # LOCAL_URI = "mongodb://localhost:27017/"
+    LOCAL_URI = "mongodb://127.0.0.1:27017/"
 
     # Khởi tạo đối tượng sync
     syncer = MongoSync(CLOUD_URI, LOCAL_URI)
