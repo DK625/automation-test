@@ -1,0 +1,70 @@
+{
+ "login": {
+   "username": "doanthuyduong2103@gmail.com",
+   "password": "Thanhthuy2103@"
+ },
+ "test_validate_empty_shipping_address": {
+   "products": [
+     {
+       "tab": "Đồng hồ",
+       "items": [
+         "Đồng hồ thông minh Apple Watch Series 9 GPS 41mm viền nhôm dây vải "
+       ]
+     },
+     {
+       "tab": "Máy tính bảng",
+       "items": ["Surface Pro 5 Core i5 7300U /12.3 inch QHD ( Model 2017)"]
+     },
+     {
+       "tab": "Laptop",
+       "items": ["Laptop Acer Gaming Nitro 5 AN515 57 53F9 i5 11400H/8GB/512GB/4GB RTX3050/144Hz/Win11"]
+     },
+     {
+       "tab": "Điện thoại",
+       "items": ["Iphone 15 promax", "Samsung Galaxy S23 8GB 128GB"]
+     }
+   ],
+   "expected_errors": [
+     "Trường này bắt buộc",
+     "Trường này bắt buộc",
+     "The phone number is min 9 number"
+   ]
+ },
+ "test_multiple_addresses": {
+   "addresses": [
+     {
+       "name": "John Doe",
+       "address": "123 Test Street",
+       "city_index": 1,
+       "phone": "0971234567"
+     },
+     {
+       "name": "John Doee",
+       "address": "123 Test Street",
+       "city_index": 1,
+       "phone": "0971234567"
+     },
+     {
+       "name": "John ererDoe",
+       "address": "123 Test Street",
+       "city_index": 1,
+       "phone": "0971234567"
+     }
+   ],
+   "expected_addresses": [
+     "John Doe 0971234567 123 Test Street Hà Nội",
+     "John Doee 0971234567 123 Test Street Hà Nội",
+     "John ererDoe 0971234567 123 Test Street Hà Nội"
+   ]
+ },
+ "test_shipping_fee": {
+   "providers": {
+     "shopee": "20.000 VND",
+     "ghtk": "1.000 VND"
+   }
+ },
+ "test_price_calculation": {
+   "product_prices" : ["3.790.000 VND", "5.990.000 VND", "16.490.000 VND", "27.290.000 VND",
+                                  "17.490.000 VND"]
+ }
+}

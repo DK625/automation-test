@@ -6,6 +6,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import time
 from pymongo import MongoClient
+import json
 
 
 class TestPurchase():
@@ -17,6 +18,7 @@ class TestPurchase():
         """Chạy một lần khi bắt đầu tất cả test cases"""
         cls.driver = webdriver.Chrome()
         cls.vars = {}
+        cls.input_data = cls.load_json('test_input.json')
         try:
             cls.mongo_client = MongoClient("mongodb://localhost:27017/")
             cls.db = cls.mongo_client["test"]
@@ -25,6 +27,11 @@ class TestPurchase():
             print("MongoDB connection established")
         except Exception as e:
             print(f"MongoDB connection error: {str(e)}")
+
+    @classmethod
+    def load_json(cls, filename):
+        with open(filename, 'r', encoding='utf-8') as f:
+            return json.load(f)
 
     @classmethod
     def teardown_class(cls):
@@ -96,6 +103,7 @@ class TestPurchase():
             cls.driver.quit()
 
     def login(self):
+        login_input = self.input_data['login']
         self.driver.get("http://localhost:3000/home")
         self.driver.maximize_window()
 
@@ -106,71 +114,37 @@ class TestPurchase():
         login_button.click()
 
         # Nhập email - using MUI TextField selector
-        email_input = WebDriverWait(self.driver, 55).until(
+        email_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[aria-invalid='false']"))
         )
-        email_input.send_keys("doanthuyduong2103@gmail.com")
+        email_input.send_keys(login_input['username'])
 
         # Nhập password - using MUI TextField selector with type='password'
-        password_input = WebDriverWait(self.driver, 55).until(
+        password_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[type='password']"))
         )
-        password_input.send_keys("Thanhthuy2103@")
+        password_input.send_keys(login_input['password'])
 
-        submit_button = WebDriverWait(self.driver, 55).until(
+        submit_button = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))
         )
         submit_button.click()
 
     def test_validate_empty_shipping_address_fields(self):
         self.login()
+        input_data = self.input_data['test_validate_empty_shipping_address']
 
-        # Add watch to cart
-        add_to_cart1 = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiGrid-root:nth-child(1) .MuiButtonBase-root:nth-child(1)"))
-        )
-        add_to_cart1.click()
-
-        # Switch to tablet tab and add 2 products
-        tab_tablet = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiTab-root:nth-child(2)"))
-        )
-        tab_tablet.click()
-
-        product1_tablet = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable(
-                (By.CSS_SELECTOR, ".MuiGrid-root:nth-child(1) > .MuiPaper-root .MuiButtonBase-root:nth-child(1)"))
-        )
-        product1_tablet.click()
-
-        product2_tablet = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiGrid-root:nth-child(2) .MuiButtonBase-root:nth-child(1)"))
-        )
-        product2_tablet.click()
-
-        # Switch to laptop tab
-        tab_laptop = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiTab-root:nth-child(3)"))
-        )
-        tab_laptop.click()
-
-        product1_laptop = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable(
-                (By.CSS_SELECTOR, ".MuiGrid-root:nth-child(1) > .MuiPaper-root .MuiButtonBase-root:nth-child(1)"))
-        )
-        product1_laptop.click()
-
-        # Switch to phone tab
-        tab_phone = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButtonBase-root:nth-child(4)"))
-        )
-        tab_phone.click()
-
-        product_phone = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable(
-                (By.CSS_SELECTOR, ".MuiGrid-root:nth-child(2) > .MuiPaper-root .MuiButtonBase-root:nth-child(1)"))
-        )
-        product_phone.click()
+        for product in input_data['products']:
+            # Click tab
+            tab = WebDriverWait(self.driver, 55).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='tab-{product['tab']}']"))
+            )
+            tab.click()
+            for product_name in product['items']:
+                add_button = WebDriverWait(self.driver, 35).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='add-to-cart-{product_name}']"))
+                )
+                self.driver.execute_script("arguments[0].click();", add_button)
 
         # Click cart icon
         cart_icon = WebDriverWait(self.driver, 55).until(
@@ -206,7 +180,7 @@ class TestPurchase():
         change_address = WebDriverWait(self.driver, 55).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-text"))
         )
-        change_address.click()
+        self.driver.execute_script("arguments[0].click();", change_address)
 
         WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR,
@@ -246,11 +220,9 @@ class TestPurchase():
         assert len(error_messages) >= 3, "Expected at least 3 error messages for required fields"
 
         # Verify specific error messages
-        # expected_errors = ["Trường này bắt buộc", "Trường này bắt buộc", "Số điện thoại tối thiểu là 9 số"]
-        expected_errors = ["Trường này bắt buộc", "Trường này bắt buộc", "The phone number is min 9 number"]
         actual_errors = [message.text for message in error_messages]
 
-        for expected in expected_errors:
+        for expected in input_data['expected_errors']:
             assert expected in actual_errors, f"Expected error message '{expected}' not found"
 
         # Close form
@@ -277,8 +249,11 @@ class TestPurchase():
         - Verifies form input matches displayed information
         - Checks address details inside and outside the form
         """
-        WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))).click()  # start change
+        input_data = self.input_data['test_multiple_addresses']
+        change_button = WebDriverWait(self.driver, 55).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiButton-root"))
+        )
+        self.driver.execute_script("arguments[0].click();", change_button)  # start change
         cancel_button = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'MuiButton-text') and text()='Hủy bỏ']"))
         )
@@ -289,90 +264,37 @@ class TestPurchase():
         )
         add_button.click()  # add new address
         # Using the most reliable selectors for each field
-        name_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập họ và tên']"))
-        )
-        name_input.send_keys("John Doe")
+        for index, address in enumerate(input_data['addresses']):
+            name_input = WebDriverWait(self.driver, 35).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập họ và tên']"))
+            )
+            name_input.send_keys(address['name'])
 
-        address_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập địa chỉ']"))
-        )
-        address_input.send_keys("123 Test Street")
+            address_input = WebDriverWait(self.driver, 35).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập địa chỉ']"))
+            )
+            address_input.send_keys(address['address'])
 
-        city_select = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div[role='combobox']"))
-        )
-        city_select.click()
-        city_options = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.MuiMenuItem-root"))
-        )
-        city_options[1].click()
+            city_select = WebDriverWait(self.driver, 35).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "div[role='combobox']"))
+            )
+            city_select.click()
+            city_options = WebDriverWait(self.driver, 35).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.MuiMenuItem-root"))
+            )
+            city_options[address['city_index']].click()
 
-        phone_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[inputmode='numeric'][pattern='[0-9]*']"))
-        )
-        phone_input.send_keys("0971234567")
+            phone_input = WebDriverWait(self.driver, 35).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[inputmode='numeric'][pattern='[0-9]*']"))
+            )
+            phone_input.send_keys(address['phone'])
 
-        self.driver.find_element(By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root").click()  # confirm
+            self.driver.find_element(By.CSS_SELECTOR,
+                                     ".css-1uimnmd-MuiButtonBase-root-MuiButton-root").click()  # confirm
 
-        self.driver.find_element(By.CSS_SELECTOR,
-                                 ".css-1lfi9f6-MuiButtonBase-root-MuiButton-root").click()  # add new address
-        # Using the most reliable selectors for each field
-        name_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập họ và tên']"))
-        )
-        name_input.send_keys("John Doee")
-
-        address_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập địa chỉ']"))
-        )
-        address_input.send_keys("123 Test Street")
-
-        city_select = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div[role='combobox']"))
-        )
-        city_select.click()
-        city_options = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.MuiMenuItem-root"))
-        )
-        city_options[1].click()
-
-        phone_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[inputmode='numeric'][pattern='[0-9]*']"))
-        )
-        phone_input.send_keys("0971234567")
-
-        self.driver.find_element(By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root").click()  # confirm
-
-        self.driver.find_element(By.CSS_SELECTOR,
-                                 ".css-1lfi9f6-MuiButtonBase-root-MuiButton-root").click()  # add new address
-        # Using the most reliable selectors for each field
-        name_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập họ và tên']"))
-        )
-        name_input.send_keys("John ererDoe")
-
-        address_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập địa chỉ']"))
-        )
-        address_input.send_keys("123 Test Street")
-
-        city_select = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div[role='combobox']"))
-        )
-        city_select.click()
-        city_options = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.MuiMenuItem-root"))
-        )
-        city_options[1].click()
-
-        phone_input = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[inputmode='numeric'][pattern='[0-9]*']"))
-        )
-        phone_input.send_keys("0971234567")
-
-        self.driver.find_element(By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root").click()  # confirm
-
+            if index < len(input_data['addresses']) - 1:
+                self.driver.find_element(By.CSS_SELECTOR,
+                                         ".css-1lfi9f6-MuiButtonBase-root-MuiButton-root").click()  # add new address
         second_address = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
                 (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][1]"))
@@ -386,9 +308,9 @@ class TestPurchase():
                 (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][3]"))
         ).text
 
-        assert second_address == "John Doe 0971234567 123 Test Street Hà Nội", "Second address does not match"
-        assert third_address == "John Doee 0971234567 123 Test Street Hà Nội", "Third address does not match"
-        assert fourth_address == "John ererDoe 0971234567 123 Test Street Hà Nội", "Fourth address does not match"
+        assert second_address == input_data['expected_addresses'][0], "Second address does not match"
+        assert third_address == input_data['expected_addresses'][1], "Third address does not match"
+        assert fourth_address == input_data['expected_addresses'][2], "Fourth address does not match"
         print(f"""
         TEST CASE: Add Multiple Addresses and Verify Form Display
 
@@ -449,7 +371,7 @@ class TestPurchase():
         - GHTK: Fixed 1,000 VND
         - Verifies fee display and total calculation
         """
-
+        input_data = self.input_data['test_shipping_fee']
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".MuiFormControlLabel-root:nth-child(2) .PrivateSwitchBase-input").click()  # change shoppe method
         shoppe_shipping_fee = WebDriverWait(self.driver, 35).until(
@@ -459,11 +381,11 @@ class TestPurchase():
         ghtk_shipping_fee = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".css-147dy5z:nth-child(2) p:last-child"))
         ).text
-        assert shoppe_shipping_fee == "20.000 VND", (
-            f"Shopee shipping fee incorrect. Expected: 20.000 VND, Got: {shoppe_shipping_fee}"
+        assert shoppe_shipping_fee == input_data['providers']['shopee'], (
+            f"Shopee shipping fee incorrect. Expected: {input_data['providers']['shopee']}, Got: {shoppe_shipping_fee}"
         )
-        assert ghtk_shipping_fee == "1.000 VND", (
-            f"GHTK shipping fee incorrect. Expected: 1.000 VND, Got: {ghtk_shipping_fee}"
+        assert ghtk_shipping_fee == input_data['providers']['ghtk'], (
+            f"GHTK shipping fee incorrect. Expected: {input_data['providers']['ghtk']}, Got: {ghtk_shipping_fee}"
         )
         print(f"""
            TEST CASE: Shipping Fee Calculation By Provider
@@ -498,6 +420,7 @@ class TestPurchase():
             """Convert price string to integer"""
             return int(price_string.replace('VND', '').replace('.', '').strip())
 
+        input_data = self.input_data['test_price_calculation']
         # Then use it
         product_prices = [
             get_product_price(item)
@@ -512,8 +435,8 @@ class TestPurchase():
         product_prices_sum = sum(get_price_amount(price) for price in product_prices)
         shipping_fee_amount = get_price_amount(shipping_fee)
         total_amount_value = get_price_amount(total_amount)
-        assert product_prices == ['3.790.000 VND', '2.995.000', '874.650', '16.490.000 VND', '5.000.000 VND'], (
-            f"Product prices mismatch. Expected: ['3.790.000 VND', '2.995.000', '874.650', '16.490.000 VND', '5.000.000 VND'], "
+        assert product_prices == input_data['product_prices'], (
+            f"Product prices mismatch. Expected: {product_prices}, "
             f"Got: {product_prices}"
         )
 
