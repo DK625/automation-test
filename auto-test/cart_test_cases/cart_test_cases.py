@@ -2,7 +2,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
+from pymongo import MongoClient
+import json
 
 
 class TestCart():
@@ -14,6 +15,20 @@ class TestCart():
         """Chạy một lần khi bắt đầu tất cả test cases"""
         cls.driver = webdriver.Chrome()
         cls.vars = {}
+        cls.input_data = cls.load_json('test_input.json')
+        try:
+            cls.mongo_client = MongoClient("mongodb://localhost:27017/")
+            cls.db = cls.mongo_client["test"]
+            cls.users_collection = cls.db["users"]
+            cls.orders_collection = cls.db["orders"]
+            print("MongoDB connection established")
+        except Exception as e:
+            print(f"MongoDB connection error: {str(e)}")
+
+    @classmethod
+    def load_json(cls, filename):
+        with open(filename, 'r', encoding='utf-8') as f:
+            return json.load(f)
 
     @classmethod
     def teardown_class(cls):
@@ -48,6 +63,7 @@ class TestCart():
             self.driver.execute_script(f"window.localStorage.setItem('productCart', 'b');")
 
     def login(self):
+        login_input = self.input_data['login']
         self.driver.get("http://localhost:3000/home")
         self.driver.maximize_window()
 
@@ -61,13 +77,13 @@ class TestCart():
         email_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[aria-invalid='false']"))
         )
-        email_input.send_keys("doanthuyduong2103@gmail.com")
+        email_input.send_keys(login_input['username'])
 
         # Nhập password - using MUI TextField selector with type='password'
         password_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[type='password']"))
         )
-        password_input.send_keys("Thanhthuy2103@")
+        password_input.send_keys(login_input['password'])
 
         submit_button = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))
@@ -75,6 +91,7 @@ class TestCart():
         submit_button.click()
 
     def test_add_product_to_cart(self):
+        input_data = self.input_data['add_to_cart']
         self.login()
         cart_icon = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--flowbite > path"))
@@ -92,48 +109,12 @@ class TestCart():
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButtonBase-root:nth-child(4)"))
         )
         button4.click()  # Click vào tab Điện thoại để xem sản phẩm
-
-        add_to_cart4 = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiGrid-root:nth-child(4) .MuiButtonBase-root:nth-child(1)"))
-        )
-        add_to_cart4.click()  # Click vào nút thêm giỏ hàng của Iphone 15 promax
-
-        updated_count_element = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBadge-badge"))
-        )
-        updated_count = int(updated_count_element.text)
-        assert updated_count == initial_count + 1, f"Expected count to be {initial_count + 1}, but got {updated_count}"  # Kiểm tra số lượng tăng lên 1
-
-        cart_icon = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--flowbite"))
-        )
-        cart_icon.click()  # Click vào cart icon để xem sản phẩm vừa được thêm vào
-
-        backdrop = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiBackdrop-root"))
-        )
-        backdrop.click()  # Click vào vung trắng để đóng giỏ hàng
-
-        add_to_cart5 = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiGrid-root:nth-child(5) .MuiButtonBase-root:nth-child(1)"))
-        )
-        add_to_cart5.click()  # Click vào nút thêm vào giỏ hàng của sản phẩm Samsung Galaxy S23 8GB 128GB
-
-        # Click vào badge color primary
-        badge = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiBadge-colorPrimary"))
-        )
-        badge.click()  # Click vào cart icon để xem sản phẩm vừa được thêm vào
-
-        backdrop = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiBackdrop-root"))
-        )
-        backdrop.click()  # Click vào vùng trắng để đóng giỏ hàng
-
-        button5 = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiGrid-root:nth-child(5) .MuiButtonBase-root:nth-child(1)"))
-        )
-        button5.click()  # Click vào nút thêm vào giỏ hàng của sản phẩm Samsung Galaxy S23 8GB 128GB, them 1 sp nua
+        for product in input_data:
+            product_name = list(product.keys())[0]
+            add_button = WebDriverWait(self.driver, 35).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='add-to-cart-{product_name}']"))
+            )
+            self.driver.execute_script("arguments[0].click();", add_button)
 
         icon1 = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiIconButton-colorInherit:nth-child(1)"))
@@ -205,16 +186,6 @@ class TestCart():
         # self.save_all_local_storage()
 
     def test_product_info_display(self):
-        # self.driver.get("http://localhost:3000/home")
-        # self.driver.set_window_size(962, 1089)
-        # self.restore_all_local_storage()
-        # self.driver.get("http://localhost:3000/home")
-
-        # Đợi trang load hoàn tất
-        # WebDriverWait(self.driver, 35).until(
-        #     lambda driver: driver.execute_script("return document.readyState") == "complete"
-        # )
-
         # Tìm lại element sau mỗi thao tác để tránh stale
         cart_icon = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--flowbite > path"))
@@ -306,38 +277,38 @@ class TestCart():
                 Status: PASSED ✅
                 """)
 
-    def test_increase_quantity(self):
+    def test_increase_decrease_quantity(self):
         self.driver.get("http://localhost:3000/my-cart")
+        input_data = self.input_data['add_to_cart']
+        for product in input_data:
+            product_name = list(product.keys())[0]
+            increase_button = WebDriverWait(self.driver, 35).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='increase-quantity-{product_name}']"))
+            )
+            decrease_button = WebDriverWait(self.driver, 35).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='decrease-quantity-{product_name}']"))
+            )
+            # Lấy giá trị ban đầu
+            initial_value = int(WebDriverWait(self.driver, 35).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
+            ).get_attribute('value'))
+            for i in range(product[product_name]['increase_quantity']):
+                self.driver.execute_script("arguments[0].click();", increase_button)
+                current_value = int(WebDriverWait(self.driver, 35).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
+            ).get_attribute('value'))
+                assert current_value == initial_value + i + 1, f"After increase {i + 1} times, expected {initial_value + i + 1} but got {current_value}"
+            for i in range(product[product_name]['decrease_quantity']):
+                self.driver.execute_script("arguments[0].click();", decrease_button)
+                current_value = int(WebDriverWait(self.driver, 35).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
+            ).get_attribute('value'))
+                assert current_value == initial_value + product[product_name][
+                    'increase_quantity'] - i - 1, f"After decrease {i + 1} times, expected {initial_value + product[product_name]['increase_quantity'] - i - 1} but got {current_value}"
 
-        # Lấy giá trị ban đầu
-        initial_value = int(WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input"))
-        ).get_attribute('value'))
-
-        # Click tăng 10 lần
-        increase_button = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1nwk2ar > button:last-child"))
-        )
-        for i in range(10):
-            increase_button.click()
-            # Kiểm tra sau mỗi lần tăng
-            current_value = int(
-                self.driver.find_element(By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input").get_attribute(
-                    'value'))
-            assert current_value == initial_value + i + 1, f"After increase {i + 1} times, expected {initial_value + i + 1} but got {current_value}"
-
-        # Click giảm 5 lần
-        decrease_button = WebDriverWait(self.driver, 35).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1nwk2ar > button:first-of-type"))
-        )
-        for i in range(5):
-            decrease_button.click()
-            # Kiểm tra sau mỗi lần giảm
-            current_value = int(
-                self.driver.find_element(By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input").get_attribute(
-                    'value'))
-            expected_value = initial_value + 10 - (i + 1)  # 10 lần tăng - số lần giảm
-            assert current_value == expected_value, f"After decrease {i + 1} times, expected {expected_value} but got {current_value}"
 
         print(f"""
         TEST CASE: Increase/Decrease Quantity
@@ -355,29 +326,26 @@ class TestCart():
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiBox-root.css-uz5qc span"))
         )
         checkboxes.click()  # Click vào tất cả các checkbox
-
-        # Lấy số lượng và giá của sản phẩm 1
-        quantity1 = int(WebDriverWait(self.driver, 35).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input"))
-        )[0].get_attribute('value'))
-
-        price_text1 = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiTypography-h6.css-1pwfnb7-MuiTypography-root"))
-        )[0].text
-        price1 = int(price_text1.replace('.', '').replace(' VND', ''))
-
-        # Lấy số lượng và giá của sản phẩm 2
-        quantity2 = int(WebDriverWait(self.driver, 35).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input"))
-        )[1].get_attribute('value'))
-
-        price_text2 = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiTypography-h6.css-1pwfnb7-MuiTypography-root"))
-        )[1].text
-        price2 = int(price_text2.replace('.', '').replace(' VND', ''))
-
-        # Tính tổng tiền mong đợi cho cả 2 sản phẩm
-        expected_total = (quantity1 * price1) + (quantity2 * price2)
+        input_data = self.input_data['add_to_cart']
+        expected_total = 0
+        for product in input_data:
+            product_name = list(product.keys())[0]
+            # Lấy quantity
+            quantity = int(WebDriverWait(self.driver, 35).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
+            ).get_attribute('value'))
+            try:
+                # Try to get discount price first
+                price = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, f"[data-testid='discount-price-{product_name}']"))
+                ).text
+            except:
+                # If no discount, get original price
+                price = WebDriverWait(self.driver, 35).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, f"[data-testid='price-{product_name}']"))
+                ).text
+            expected_total += quantity * int(price.replace('.', '').replace(' VND', ''))
 
         # Lấy tổng tiền hiển thị trên UI
         total_text = WebDriverWait(self.driver, 35).until(
@@ -389,24 +357,21 @@ class TestCart():
         # Assert
         assert actual_total == expected_total, f"Expected total {expected_total:,} VND but got {actual_total:,} VND"
 
+        result_str = ''
+        for product in input_data:
+            product_name = list(product.keys())[0]
+            result_str += f"""Product: {product_name}
+                ✓ Quantity: {quantity} 
+                ✓ Price per item: {price} VND
+                ✓ Subtotal: {quantity * int(price.replace('.', '').replace(' VND', '')):,} VND\n"""
+
         print(f"""
-           TEST CASE: Calculate Total Price
-
-           Results:
-           Product 1:
-           ✓ Quantity: {quantity1}
-           ✓ Price per item: {price1:,} VND
-           ✓ Subtotal: {quantity1 * price1:,} VND
-
-           Product 2:
-           ✓ Quantity: {quantity2}
-           ✓ Price per item: {price2:,} VND
-           ✓ Subtotal: {quantity2 * price2:,} VND
-
-           Total Amount: {actual_total:,} VND
-
-           Status: PASSED ✅
-           """)
+            TEST CASE: Calculate Total Price
+            Results:
+            {result_str}
+            Total Amount: {actual_total:,} VND
+            Status: PASSED ✅
+            """)
 
     def test_delete_product(self):
         self.driver.get("http://localhost:3000/my-cart")

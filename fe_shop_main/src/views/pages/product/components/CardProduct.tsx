@@ -65,6 +65,7 @@ const CardProduct = (props: TCardProduct) => {
   }
 
   const handleUpdateProductToCart = (item: TProduct) => {
+    console.log('Add to cart item:', item);
     const productCart = getLocalProductCart()
     const parseData = productCart ? JSON.parse(productCart) : {}
     const discountItem = isExpiry(item.discountStartDate, item.discountEndDate) ? item.discount : 0
@@ -239,64 +240,64 @@ const CardProduct = (props: TCardProduct) => {
           </Typography>
         )}
         {(item?.location?.name || item.views) && (
-          <Box sx={{display: "flex", alignItems: "center", gap: "10px", mt: 2}}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: "10px", mt: 2 }}>
             {item?.location?.name && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-              <Icon icon='carbon:location' />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <Icon icon='carbon:location' />
 
-              <Typography
-                variant='h6'
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}
-              >
-                {item?.location?.name}
-              </Typography>
-            </Box>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                    fontSize: '14px'
+                  }}
+                >
+                  {item?.location?.name}
+                </Typography>
+              </Box>
             )}
             {item?.views && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-              <Icon icon='lets-icons:view-light' />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <Icon icon='lets-icons:view-light' />
 
-              <Typography
-                variant='h6'
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}
-              >
-                {item?.views}
-              </Typography>
-            </Box>
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                    fontSize: '14px'
+                  }}
+                >
+                  {item?.views}
+                </Typography>
+              </Box>
             )}
             {!!item?.uniqueViews?.length && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-              <Icon icon='mdi:account-view-outline' />
-              <Typography
-                variant='h6'
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}
-              >
-                {item?.uniqueViews?.length}
-              </Typography>
-            </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <Icon icon='mdi:account-view-outline' />
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                    fontSize: '14px'
+                  }}
+                >
+                  {item?.uniqueViews?.length}
+                </Typography>
+              </Box>
             )}
-             {!!item?.likedBy?.length && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-              <Icon icon='icon-park-outline:like' />
-              <Typography
-                variant='h6'
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: '14px'
-                }}
-              >
-                {item?.likedBy?.length}
-              </Typography>
-            </Box>
+            {!!item?.likedBy?.length && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                <Icon icon='icon-park-outline:like' />
+                <Typography
+                  variant='h6'
+                  sx={{
+                    fontWeight: 'bold',
+                    fontSize: '14px'
+                  }}
+                >
+                  {item?.likedBy?.length}
+                </Typography>
+              </Box>
             )}
           </Box>
         )}
@@ -340,6 +341,7 @@ const CardProduct = (props: TCardProduct) => {
         <Button
           variant='outlined'
           fullWidth
+          data-testid={`add-to-cart-${item.name}`}
           sx={{
             height: 40,
             display: 'flex',

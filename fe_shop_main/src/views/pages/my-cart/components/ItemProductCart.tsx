@@ -86,6 +86,7 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
   // handle
 
   const handleChangeAmountCart = (item: TItemOrderProduct, amount: number) => {
+    console.log('change item: ', item)
     const productCart = getLocalProductCart()
     const parseData = productCart ? JSON.parse(productCart) : {}
     const listOrderItems = convertUpdateProductToCart(orderItems, {
@@ -147,10 +148,12 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
             mt: 2,
           }}
         >
-          <Link style={{color: "inherit"}} href={`/product/${itemState.slug}`}>{itemState.name}</Link>
+          <Link style={{ color: "inherit" }} href={`/product/${itemState.slug}`}>{itemState.name}</Link>
         </Typography>
         <Box sx={{ flexBasis: '20%' }}>
           <Typography
+            data-testid={`price-${item.name}`}
+
             variant='h6'
             mt={2}
             sx={{
@@ -166,6 +169,8 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
         <Box sx={{ flexBasis: '20%', display: 'flex', alignItems: 'center', gap: 1 }}>
           {itemState.discount > 0 && (
             <Typography
+              data-testid={`discount-price-${item.name}`}
+
               variant='h4'
               mt={2}
               sx={{
@@ -205,6 +210,8 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
 
         <Box sx={{ flexBasis: '10%', mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
           <IconButton
+            data-testid={`decrease-quantity-${item.name}`}
+
             disabled={!itemState?.countInStock}
             onClick={() => handleChangeAmountCart(item, -1)}
             sx={{
@@ -215,6 +222,8 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
             <Icon icon='ic:sharp-minus' />
           </IconButton>
           <CustomTextField
+            data-testid={`quantity-input-${item.name}`}
+
             disabled={!itemState?.countInStock}
             type='number'
             value={itemState.amount}
@@ -248,6 +257,8 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
             }}
           />
           <IconButton
+            data-testid={`increase-quantity-${item.name}`}
+
             disabled={!itemState?.countInStock}
             onClick={() => handleChangeAmountCart(item, 1)}
             sx={{
