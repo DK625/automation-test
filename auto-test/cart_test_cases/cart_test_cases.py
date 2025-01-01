@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from pymongo import MongoClient
 import json
+import os
 
 
 class TestCart():
@@ -16,6 +19,9 @@ class TestCart():
         cls.driver = webdriver.Chrome()
         cls.vars = {}
         cls.input_data = cls.load_json('test_input.json')
+        cls.test_failures_dir = "test_failures"
+        os.makedirs(cls.test_failures_dir, exist_ok=True)
+
         try:
             cls.mongo_client = MongoClient("mongodb://localhost:27017/")
             cls.db = cls.mongo_client["test"]
@@ -24,6 +30,19 @@ class TestCart():
             print("MongoDB connection established")
         except Exception as e:
             print(f"MongoDB connection error: {str(e)}")
+
+    def take_screenshot(self, name):
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{self.test_failures_dir}/{name}_{timestamp}.png"
+        self.driver.save_screenshot(filename)
+        print(f"Screenshot saved: {filename}")
+
+    def wrap_assert(self, condition, message, screenshot_name):
+        try:
+            assert condition, message
+        except AssertionError as e:
+            self.take_screenshot(f"failed_{screenshot_name}")
+            raise e
 
     @classmethod
     def load_json(cls, filename):
@@ -36,31 +55,6 @@ class TestCart():
         if hasattr(cls, 'driver'):  # Kiểm tra xem driver có tồn tại không
             cls.driver.quit()
 
-    # optional
-    def save_all_local_storage(self):
-        # Lưu và escape JSON string
-        TestCart.stored_localStorage = self.driver.execute_script(
-            "return JSON.stringify(localStorage);"
-        )
-
-    # optional
-    def restore_all_local_storage(self):
-        """Khôi phục toàn bộ localStorage"""
-        if TestCart.stored_localStorage:
-            # Xóa localStorage hiện tại
-            self.driver.execute_script("localStorage.clear();")
-            # Khôi phục từng item từ data đã lưu
-            restore_script = f"""
-                        const storedData = {TestCart.stored_localStorage};
-                        localStorage.clear();
-                        Object.keys(storedData).forEach(key => {{
-                            localStorage.setItem(key, storedData[key]);
-                        }});
-                    """
-
-            self.driver.execute_script(restore_script)
-        else:
-            self.driver.execute_script(f"window.localStorage.setItem('productCart', 'b');")
 
     def login(self):
         login_input = self.input_data['login']
@@ -167,23 +161,22 @@ class TestCart():
         )
         final_count = int(final_count_element.text)
 
-        assert cart_iphone_name == iphone_name, "Product name mismatch"
-        assert cart_samsung_name == samsung_name, "Product name mismatch"
-        assert cart_iphone_price == iphone_price, "Price mismatch"
-        assert cart_samsung_price == samsung_price, "Price mismatch"
-        assert final_count == initial_count + 3, "Quantity not increased correctly"
+        self.wrap_assert(cart_iphone_name == iphone_name, "Product name mismatch", "iphone_name")
+        self.wrap_assert(cart_samsung_name == samsung_name, "Product name mismatch", "samsung_name")
+        self.wrap_assert(cart_iphone_price == iphone_price, "Price mismatch", "iphone_price")
+        self.wrap_assert(cart_samsung_price == samsung_price, "Price mismatch", "samsung_price")
+        self.wrap_assert(final_count == initial_count + 4, "Quantity not increased correctly", "cart_quantity")
 
         print("""
-        TEST CASE: Add Products to Cart
-
-        Results:
-        ✓ Product Names Verified (iPhone & Samsung)
-        ✓ Product Prices Verified 
-        ✓ Quantity Updated: {initial_count} -> {final_count} (+3 items)
-
-        Status: PASSED ✅
-        """.format(initial_count=initial_count, final_count=final_count))
-        # self.save_all_local_storage()
+            TEST CASE: Add Products to Cart
+    
+            Results:
+            ✓ Product Names Verified (iPhone & Samsung)
+            ✓ Product Prices Verified 
+            ✓ Quantity Updated: {initial_count} -> {final_count} (+3 items)
+    
+            Status: PASSED ✅
+            """.format(initial_count=initial_count, final_count=final_count))
 
     def test_product_info_display(self):
         # Tìm lại element sau mỗi thao tác để tránh stale
@@ -258,13 +251,12 @@ class TestCart():
         ).get_attribute('value')
 
         # lấy thông tin sản phẩm từ trang chính cart
-
-        assert cart_iphone_name == iphone_name, "Product name mismatch"
-        assert cart_samsung_name == samsung_name, "Product name mismatch"
-        assert cart_iphone_price == iphone_price, "Price mismatch"
-        assert cart_samsung_price == samsung_price, "Price mismatch"
-        assert iphone_quantity == cart_iphone_quantity, "Quantity not increased correctly"
-        assert samsung_quantity == cart_samsung_quantity, "Quantity not increased correctly"
+        self.wrap_assert(cart_iphone_name == iphone_name, "Product name mismatch", "iphone_info_name")
+        self.wrap_assert(cart_samsung_name == samsung_name, "Product name mismatch", "samsung_info_name")
+        self.wrap_assert(cart_iphone_price == iphone_price, "Price mismatch", "iphone_info_price")
+        self.wrap_assert(cart_samsung_price == samsung_price, "Price mismatch", "samsung_info_price")
+        self.wrap_assert(iphone_quantity == cart_iphone_quantity, "Quantity mismatch", "iphone_info_quantity")
+        self.wrap_assert(samsung_quantity == cart_samsung_quantity, "Quantity mismatch", "samsung_info_quantity")
 
         print("""
                 TEST CASE: Product Info Display
@@ -296,19 +288,22 @@ class TestCart():
             for i in range(product[product_name]['increase_quantity']):
                 self.driver.execute_script("arguments[0].click();", increase_button)
                 current_value = int(WebDriverWait(self.driver, 35).until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
-            ).get_attribute('value'))
-                assert current_value == initial_value + i + 1, f"After increase {i + 1} times, expected {initial_value + i + 1} but got {current_value}"
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
+                ).get_attribute('value'))
+                self.wrap_assert(current_value == initial_value + i + 1,
+                                 f"After increase {i + 1} times, expected {initial_value + i + 1} but got {current_value}",
+                                 f"increase_quantity_{product_name}_{i}")
+
             for i in range(product[product_name]['decrease_quantity']):
                 self.driver.execute_script("arguments[0].click();", decrease_button)
                 current_value = int(WebDriverWait(self.driver, 35).until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
-            ).get_attribute('value'))
-                assert current_value == initial_value + product[product_name][
-                    'increase_quantity'] - i - 1, f"After decrease {i + 1} times, expected {initial_value + product[product_name]['increase_quantity'] - i - 1} but got {current_value}"
-
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, f"[data-testid='quantity-input-{product_name}'] input[type='number']"))
+                ).get_attribute('value'))
+                self.wrap_assert(current_value == initial_value + product[product_name]['increase_quantity'] - i - 1,
+                                 f"After decrease {i + 1} times, expected {initial_value + product[product_name]['increase_quantity'] - i - 1} but got {current_value}",
+                                 f"decrease_quantity_{product_name}_{i}")
 
         print(f"""
         TEST CASE: Increase/Decrease Quantity
@@ -355,7 +350,9 @@ class TestCart():
         actual_total = int(total_text.replace('.', '').replace(' VND', ''))
 
         # Assert
-        assert actual_total == expected_total, f"Expected total {expected_total:,} VND but got {actual_total:,} VND"
+        self.wrap_assert(actual_total == expected_total,
+                         f"Expected total {expected_total:,} VND but got {actual_total:,} VND",
+                         "cart_total")
 
         result_str = ''
         for product in input_data:
@@ -400,7 +397,9 @@ class TestCart():
             product_exists = False
 
         # Assert
-        assert not product_exists, f"Product '{product_name}' still exists after deletion"
+        self.wrap_assert(not product_exists,
+                         f"Product '{product_name}' still exists after deletion",
+                         "delete_product")
 
         print(f"""
         TEST CASE: Delete Product

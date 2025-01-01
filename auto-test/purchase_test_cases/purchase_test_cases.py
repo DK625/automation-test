@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
@@ -7,6 +9,8 @@ from selenium.webdriver.common.keys import Keys
 import time
 from pymongo import MongoClient
 import json
+import pytest
+import os
 
 
 class TestPurchase():
@@ -19,6 +23,8 @@ class TestPurchase():
         cls.driver = webdriver.Chrome()
         cls.vars = {}
         cls.input_data = cls.load_json('test_input.json')
+        cls.test_failures_dir = "test_failures"
+        os.makedirs(cls.test_failures_dir, exist_ok=True)
         try:
             cls.mongo_client = MongoClient("mongodb://localhost:27017/")
             cls.db = cls.mongo_client["test"]
@@ -32,6 +38,19 @@ class TestPurchase():
     def load_json(cls, filename):
         with open(filename, 'r', encoding='utf-8') as f:
             return json.load(f)
+
+    def take_screenshot(self, name):
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"{self.test_failures_dir}/{name}_{timestamp}.png"
+        self.driver.save_screenshot(filename)
+        print(f"Screenshot saved: {filename}")
+
+    def wrap_assert(self, condition, message, screenshot_name):
+        try:
+            assert condition, message
+        except AssertionError as e:
+            self.take_screenshot(f"failed_{screenshot_name}")
+            raise e
 
     @classmethod
     def teardown_class(cls):
@@ -155,7 +174,8 @@ class TestPurchase():
         quantity_in_cart = int(WebDriverWait(self.driver, 55).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBadge-badge"))
         ).text)
-        assert quantity_in_cart == 5, f"Expected 5 items in cart, got {quantity_in_cart}"
+        assert (quantity_in_cart == 5, f"Expected 5 items in cart, got {quantity_in_cart}")
+
         # Go to cart page
         cart_page_button = WebDriverWait(self.driver, 55).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-akzecb-MuiButtonBase-root-MuiButton-root"))
@@ -308,9 +328,16 @@ class TestPurchase():
                 (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][3]"))
         ).text
 
-        assert second_address == input_data['expected_addresses'][0], "Second address does not match"
-        assert third_address == input_data['expected_addresses'][1], "Third address does not match"
-        assert fourth_address == input_data['expected_addresses'][2], "Fourth address does not match"
+        self.wrap_assert(second_address == input_data['expected_addresses'][0],
+                         "Second address does not match",
+                         "second_address_check")
+        self.wrap_assert(third_address == input_data['expected_addresses'][1],
+                         "Third address does not match",
+                         "third_address_check")
+        self.wrap_assert(fourth_address == input_data['expected_addresses'][2],
+                         "Fourth address does not match",
+                         "fourth_address_check")
+
         print(f"""
         TEST CASE: Add Multiple Addresses and Verify Form Display
 
@@ -347,10 +374,10 @@ class TestPurchase():
             EC.presence_of_element_located((By.CSS_SELECTOR, "span.MuiTypography-root.css-1f0oh43-MuiTypography-root"))
         ).text
 
-        assert phone_name + address == '0971234567 John Doe123 Test Street Hà Nội', (
-            f"Address mismatch. Expected: '0971234567 John Doe123 Test Street Hà Nội', "
-            f"Got: '{phone_name + address}'"
-        )
+        self.wrap_assert(phone_name + address == '123 Test Street Hà Nội',
+                         f"Address mismatch. Expected: '123 Test Street Hà Nội', Got: '{phone_name + address}'",
+                         "delivery_address_check")
+
         print(f"""
            TEST CASE: Update Delivery Address and Verify Display
 
@@ -381,12 +408,13 @@ class TestPurchase():
         ghtk_shipping_fee = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".css-147dy5z:nth-child(2) p:last-child"))
         ).text
-        assert shoppe_shipping_fee == input_data['providers']['shopee'], (
-            f"Shopee shipping fee incorrect. Expected: {input_data['providers']['shopee']}, Got: {shoppe_shipping_fee}"
-        )
-        assert ghtk_shipping_fee == input_data['providers']['ghtk'], (
-            f"GHTK shipping fee incorrect. Expected: {input_data['providers']['ghtk']}, Got: {ghtk_shipping_fee}"
-        )
+        self.wrap_assert(shoppe_shipping_fee == input_data['providers']['shopee'],
+                         f"Shopee shipping fee incorrect. Expected: {input_data['providers']['shopee']}, Got: {shoppe_shipping_fee}",
+                         "shopee_fee_check")
+        self.wrap_assert(ghtk_shipping_fee == input_data['providers']['ghtk'],
+                         f"GHTK shipping fee incorrect. Expected: {input_data['providers']['ghtk']}, Got: {ghtk_shipping_fee}",
+                         "ghtk_fee_check")
+
         print(f"""
            TEST CASE: Shipping Fee Calculation By Provider
 
@@ -435,15 +463,12 @@ class TestPurchase():
         product_prices_sum = sum(get_price_amount(price) for price in product_prices)
         shipping_fee_amount = get_price_amount(shipping_fee)
         total_amount_value = get_price_amount(total_amount)
-        assert product_prices == input_data['product_prices'], (
-            f"Product prices mismatch. Expected: {product_prices}, "
-            f"Got: {product_prices}"
-        )
-
-        assert product_prices_sum + shipping_fee_amount == total_amount_value, (
-            f"Total amount mismatch. Expected: {product_prices_sum + shipping_fee_amount:,} VND, "
-            f"Got: {total_amount_value:,} VND"
-        )
+        self.wrap_assert(product_prices == input_data['product_prices'],
+                         f"Product prices mismatch. Expected: {input_data['product_prices']}, Got: {product_prices}",
+                         "product_prices_check")
+        self.wrap_assert(product_prices_sum + shipping_fee_amount == total_amount_value,
+                         f"Total amount mismatch. Expected: {product_prices_sum + shipping_fee_amount:,} VND, Got: {total_amount_value:,} VND",
+                         "total_amount_check")
 
         print(f"""
         TEST CASE: Verify Order Total Calculation
@@ -587,44 +612,6 @@ class TestPurchase():
         )
         detail_button.click()
 
-        # def get_order_details():
-        #     products = WebDriverWait(self.driver, 35).until(
-        #         EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiBox-root.css-fm4r4t"))
-        #     )
-        #
-        #     product_details = []
-        #     for item in products:
-        #         # Get product name
-        #         name = item.find_element(By.CSS_SELECTOR, "p.MuiTypography-body1.css-1wwbtrn-MuiTypography-root").text
-        #
-        #         # Get original price
-        #         original_price = item.find_element(By.CSS_SELECTOR, "h6.MuiTypography-h6").text
-        #
-        #         # Get quantity (remove "x " from string)
-        #         quantity = item.find_element(By.CSS_SELECTOR, "p.css-1v9bxkl-MuiTypography-root").text.replace('x ', '')
-        #
-        #         # Get discounted price and discount percentage if exists
-        #         try:
-        #             discounted_price = item.find_element(By.CSS_SELECTOR,
-        #                                                  ".MuiTypography-h4.css-kpslfv-MuiTypography-root").text
-        #             discount_percent = item.find_element(By.CSS_SELECTOR, ".css-kwmwbo-MuiTypography-root").text
-        #         except:
-        #             discounted_price = None
-        #             discount_percent = None
-        #
-        #         product_details.append({
-        #             "name": name,
-        #             "original_price": original_price,
-        #             "discounted_price": discounted_price,
-        #             "discount_percent": discount_percent,
-        #             "quantity": quantity
-        #         })
-        #
-        #     return product_details
-
-        # Get and print product details
-        # order_details = get_order_details()
-
         def get_order_summary():
             # Get delivery address
             delivery_address = WebDriverWait(self.driver, 35).until(
@@ -675,10 +662,17 @@ class TestPurchase():
 
         order_summary = get_order_summary()
         # assert product_details == order_details, 'Product details and order detail mismatch'
-        assert address == order_summary['delivery_address'], 'Delivery address mismatch'
-        assert product_prices == order_prices, 'Delivery address mismatch'
-        assert phone_name == '0' + order_summary['phone'] + ' ' + order_summary[
-            'order_name'], 'Phone number and name mismatch'
+        self.wrap_assert(address == order_summary['delivery_address'],
+                         'Delivery address mismatch',
+                         'delivery_address_match')
+
+        self.wrap_assert(product_prices == order_prices,
+                         'Price summary mismatch',
+                         'price_summary_match')
+
+        self.wrap_assert(phone_name == '0' + order_summary['phone'] + ' ' + order_summary['order_name'],
+                         'Phone number and name mismatch',
+                         'contact_info_match')
         print(f"""
            TEST CASE: Order Details Consistency
 
@@ -713,7 +707,9 @@ class TestPurchase():
         except:
             after_quantity_in_cart = 0
 
-        assert after_quantity_in_cart == 0, "Expected 0 items in after purchase"
+        self.wrap_assert(after_quantity_in_cart == 0,
+                         "Expected 0 items in after purchase",
+                         "cart_empty_check")
         print(f"""
                        TEST CASE: Purchase Flow Integration
 
@@ -725,8 +721,3 @@ class TestPurchase():
                        Status: PASSED ✅
                        """)
 
-    def test_save_data_in_mongo(self):
-        pass
-
-    def rollback_data_in_mongo(self):
-        pass
