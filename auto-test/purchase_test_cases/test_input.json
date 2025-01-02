@@ -63,6 +63,9 @@
      "ghtk": "1.000 VND"
    }
  },
+  "test_update_delivery_address_and_verify_display": {
+    "expect_delivery_address": "0971234567 John Doe 123 Test Street Hà Nội"
+  },
  "test_price_calculation": {
    "product_prices" : ["3.790.000 VND", "5.990.000 VND", "16.490.000 VND", "27.290.000 VND",
                                   "17.490.000 VND"]

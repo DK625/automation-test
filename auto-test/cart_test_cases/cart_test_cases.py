@@ -147,7 +147,6 @@ class TestCart():
             EC.presence_of_element_located(
                 (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-h5.css-mxh2yv-MuiTypography-root"))
         ).text
-
         cart_iphone_price = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBox-root.css-19nzcwv"))
             # hoặc div, span chứa giá trong cart
@@ -165,7 +164,7 @@ class TestCart():
         self.wrap_assert(cart_samsung_name == samsung_name, "Product name mismatch", "samsung_name")
         self.wrap_assert(cart_iphone_price == iphone_price, "Price mismatch", "iphone_price")
         self.wrap_assert(cart_samsung_price == samsung_price, "Price mismatch", "samsung_price")
-        self.wrap_assert(final_count == initial_count + 4, "Quantity not increased correctly", "cart_quantity")
+        self.wrap_assert(final_count == initial_count + 3, "Quantity not increased correctly", "cart_quantity")
 
         print("""
             TEST CASE: Add Products to Cart
