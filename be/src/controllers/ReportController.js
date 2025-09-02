@@ -1,11 +1,11 @@
-const {CONFIG_MESSAGE_ERRORS} = require("../configs");
+const { CONFIG_MESSAGE_ERRORS } = require("../configs");
 const ReportService = require("../services/ReportService");
-const {getMonthlyProductAnalytics, getCustomerOrderCounts} = require("../services/ReportService");
+const { getMonthlyProductAnalytics, getCustomerOrderCounts } = require("../services/ReportService");
 
 const getReportCountProductType = async (req, res) => {
     try {
         const response = await ReportService.getReportCountProductType();
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -26,7 +26,7 @@ const getReportCountProductType = async (req, res) => {
 const getReportCountRecords = async (req, res) => {
     try {
         const response = await ReportService.getReportCountRecords();
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -46,7 +46,7 @@ const getReportCountRecords = async (req, res) => {
 const getReportCountUser = async (req, res) => {
     try {
         const response = await ReportService.getReportCountUser();
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -66,7 +66,7 @@ const getReportCountUser = async (req, res) => {
 const getReportTotalRevenue = async (req, res) => {
     try {
         const response = await ReportService.getReportTotalRevenue();
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -85,7 +85,7 @@ const getReportTotalRevenue = async (req, res) => {
 const getReportCountOrderStatus = async (req, res) => {
     try {
         const response = await ReportService.getReportCountOrderStatus();
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -105,7 +105,7 @@ const getReportCountOrderStatus = async (req, res) => {
 const getReportCountProductStatus = async (req, res) => {
     try {
         const response = await ReportService.getReportCountProductStatus();
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -123,7 +123,6 @@ const getReportCountProductStatus = async (req, res) => {
 };
 const getMonthlyIncome = async (req, res) => {
     try {
-        console.log("run here")
         const currentDate = new Date();
         const response = await getMonthlyProductAnalytics(
             currentDate.getFullYear(),
@@ -131,7 +130,7 @@ const getMonthlyIncome = async (req, res) => {
         );
 
 
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -155,7 +154,7 @@ const getCustomerOrderCount = async (req, res) => {
         const response = await getCustomerOrderCounts();
 
 
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,

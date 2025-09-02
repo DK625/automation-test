@@ -1,4 +1,4 @@
-import {createAsyncThunk} from '@reduxjs/toolkit'
+import { createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** services
 import {
@@ -12,7 +12,7 @@ import {
 } from 'src/services/auth'
 
 // ** Types
-import {TChangePassword, TForgotPasswordAuth, TResetPasswordAuth} from 'src/types/auth'
+import { TChangePassword, TForgotPasswordAuth, TResetPasswordAuth } from 'src/types/auth'
 
 export const serviceName = 'role'
 
@@ -20,7 +20,7 @@ export const registerAuthAsync = createAsyncThunk(`${serviceName}/register`, asy
     const response = await registerAuth(data)
 
     console.log("run here")
-    console.log({response})
+    console.log({ response })
 
     if (response?.data) {
         return response
@@ -84,7 +84,7 @@ export const changePasswordMeAsync = createAsyncThunk(
         const response = await changePasswordMe(data)
 
         if (response?.status === 'Success') {
-            return {...response, data: 1}
+            return { ...response, data: 1 }
         }
 
         return {

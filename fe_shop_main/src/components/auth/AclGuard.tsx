@@ -32,7 +32,7 @@ const AclGuard = (props: AclGuardProps) => {
   const router = useRouter()
 
   useEffect(() => {
-    if(router.route === "/") {
+    if (router.route === "/") {
       router.push(ROUTE_CONFIG.HOME)
     }
   }, [router])

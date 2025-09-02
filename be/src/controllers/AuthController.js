@@ -58,7 +58,7 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { email, password} = req.body;
+    const { email, password } = req.body;
     const REGEX_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const REGEX_PASSWORD =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
@@ -124,6 +124,8 @@ const loginUser = async (req, res) => {
   }
 };
 
+
+
 const refreshToken = async (req, res) => {
   try {
     const token = req.headers["authorization"].split(" ")[1];
@@ -171,6 +173,8 @@ const logoutUser = async (req, res) => {
     });
   }
 };
+
+
 
 const getAuthMe = async (req, res) => {
   try {
@@ -459,7 +463,7 @@ const loginFacebook = async (req, res) => {
     }
 
     const response = await AuthService.loginFacebook(req.body);
-    const { data, status, typeError, message, statusMessage,refresh_token,access_token } = response;
+    const { data, status, typeError, message, statusMessage, refresh_token, access_token } = response;
     return res.status(status).json({
       typeError,
       data: {

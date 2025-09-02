@@ -27,7 +27,7 @@ export const updateUser = async (data: TParamsEditUser) => {
   try {
     const res = await instanceAxios.put(`${API_ENDPOINT.SYSTEM.USER.INDEX}/${id}`, rests)
 
-    return res.data
+    return res.data//
   } catch (error: any) {
     return error?.response?.data
   }

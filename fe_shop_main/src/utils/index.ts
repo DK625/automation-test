@@ -75,6 +75,22 @@ export const getAllValueOfObject = (obj: any, arrExlude?: string[]) => {
     return []
   }
 }
+export const getAllValueOfObjectNotExclude = (obj: any) => {
+  try {
+    const values: any[] = []
+    for (const key in obj) {
+      if (typeof obj[key] === 'object') {
+        values.push(...getAllValueOfObject(obj[key]))
+      } else {
+        values.push(obj[key])
+      }
+    }
+
+    return values
+  } catch (error) {
+    return []
+  }
+}
 
 export const formatFilter = (filter: any) => {
   const result: Record<string, string> = {}

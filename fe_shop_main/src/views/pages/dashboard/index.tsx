@@ -1,11 +1,11 @@
 // ** React
-import {useEffect, useState} from "react"
+import { useEffect, useState } from "react"
 
 // ** Components
 import Spinner from "src/components/spinner"
 
 // ** Mui
-import {Box, Grid} from "@mui/material"
+import { Box, Grid } from "@mui/material"
 
 // ** Services
 import {
@@ -21,11 +21,14 @@ import CardProductType from "src/views/pages/dashboard/components/CardMonthlyInc
 import CardCountRevenue from "src/views/pages/dashboard/components/CardCountRevenue"
 import CardCountUserType from "src/views/pages/dashboard/components/CardCountUserType"
 import CardCountOrderStatus from "src/views/pages/dashboard/components/CardCountStatusOrder"
-import {getAllProducts} from "src/services/product"
+import { getAllProducts } from "src/services/product"
 import CardProductPopular from "src/views/pages/dashboard/components/CardProductPopular"
 import CardMonthlyIncome from "src/views/pages/dashboard/components/CardMonthlyIncomeByRevenue";
 import CardMonthlyIncomeBySold from "src/views/pages/dashboard/components/CardMonthlyIncomeBySold";
 import CardCustomerPopular from "src/views/pages/dashboard/components/CardCustomerPopular";
+import { useRouter } from "next/router"
+import { ROUTE_CONFIG } from "src/configs/route"
+import { useAuth } from "src/hooks/useAuth"
 
 export interface TCountProductType {
     typeName: string,
@@ -68,6 +71,7 @@ const Dashboard = () => {
     const [listProductPopular, setListProductPopular] = useState<TProductPopular[]>([])
     const [dataMonthlyIncome, setdataMonthlyIncome] = useState<any[]>([])
     const [customerOrder, setCustomerOrder] = useState<any[]>([])
+    const { logout } = useAuth()
 
 
     // ** Fetch API
@@ -130,7 +134,7 @@ const Dashboard = () => {
 
     const fetchListProductPopular = async () => {
         setLoading(true)
-        await getAllProducts({params: {limit: 5, page: 1, order: "sold desc"}}).then((res) => {
+        await getAllProducts({ params: { limit: 5, page: 1, order: "sold desc" } }).then((res) => {
             const data = res?.data
             setLoading(false)
             setListProductPopular(data?.products)
@@ -141,7 +145,13 @@ const Dashboard = () => {
     const fetchMonthlyIncome = async () => {
         setLoading(true)
         await getMonthlyIncome().then((res) => {
+
+            if (res?.response && res?.response?.status === 401) {
+                logout()
+                return;
+            }
             const data = res?.data
+
             // console.log({monthlyIncome: data})
             setLoading(false)
             setdataMonthlyIncome(data)
@@ -154,7 +164,7 @@ const Dashboard = () => {
         setLoading(true)
         await getMCustomerOrders().then((res) => {
             const data = res?.data
-            console.log({customerOrders: data})
+            console.log({ customerOrders: data })
             setLoading(false)
             setCustomerOrder(data)
             // setListProductPopular(data?.products)
@@ -177,26 +187,26 @@ const Dashboard = () => {
 
     return (
         <Box>
-            {loading && <Spinner/>}
-            <CardCountRecords data={countRecords}/>
+            {loading && <Spinner />}
+            <CardCountRecords data={countRecords} />
             <Grid container spacing={6}>
                 <Grid item md={4} xs={12}>
-                    <CardMonthlyIncome rawData={dataMonthlyIncome}/>
+                    <CardMonthlyIncome rawData={dataMonthlyIncome} />
                 </Grid>
                 <Grid item md={4} xs={12}>
-                    <CardMonthlyIncomeBySold rawData={dataMonthlyIncome}/>
+                    <CardMonthlyIncomeBySold rawData={dataMonthlyIncome} />
                 </Grid>
                 <Grid item md={4} xs={12}>
-                    <CardCountRevenue data={countRevenues}/>
+                    <CardCountRevenue data={countRevenues} />
                 </Grid>
                 <Grid item md={4} xs={12}>
-                    <CardProductPopular data={listProductPopular}/>
+                    <CardProductPopular data={listProductPopular} />
                 </Grid>
                 <Grid item md={4} xs={12}>
-                    <CardCustomerPopular data={customerOrder}/>
+                    <CardCustomerPopular data={customerOrder} />
                 </Grid>
                 <Grid item md={4} xs={12}>
-                    <CardCountOrderStatus data={countOrderStatus}/>
+                    <CardCountOrderStatus data={countOrderStatus} />
                 </Grid>
             </Grid>
         </Box>

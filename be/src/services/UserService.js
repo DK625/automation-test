@@ -135,6 +135,7 @@ const updateUser = (id, data) => {
       const updatedUser = await User.findByIdAndUpdate(id, dataUser, {
         new: true,
       });
+
       resolve({
         status: CONFIG_MESSAGE_ERRORS.ACTION_SUCCESS.status,
         message: "Updated user success",
@@ -200,7 +201,7 @@ const getAllUser = (params) => {
     try {
       const limit = params?.limit ? +params?.limit : 10;
       const search = params?.search ?? "";
-      const page = params?.page ?  +params.page :  1;
+      const page = params?.page ? +params.page : 1;
       const order = params?.order ?? "createdAt desc";
       const query = {};
       const roleId = params?.roleId ?? "";
@@ -230,7 +231,7 @@ const getAllUser = (params) => {
             ? { $in: roleIds }
             : mongoose.Types.ObjectId(roleId);
       }
-      
+
       if (cityId) {
         const cityIds = cityId
           ?.split("|")

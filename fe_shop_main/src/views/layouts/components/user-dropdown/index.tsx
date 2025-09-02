@@ -34,6 +34,7 @@ import { toFullName } from 'src/utils'
 // ** Redux
 import { useSelector } from 'react-redux'
 import { RootState } from 'src/stores'
+import { PERMISSIONS } from 'src/configs/permission'
 
 type TProps = {}
 
@@ -101,7 +102,13 @@ const UserDropdown = (props: TProps) => {
   }
 
   const handleNavigateManageSystem = () => {
-    router.push(ROUTE_CONFIG.DASHBOARD)
+    if (permissionUser.includes(PERMISSIONS.DASHBOARD)) {
+      router.push(ROUTE_CONFIG.DASHBOARD)
+    }
+    else if (permissionUser.includes("SYSTEM.VIEW")) {
+      router.push(ROUTE_CONFIG.MANAGE_PRODUCT.PRODUCT)
+    }
+
     handleClose()
   }
 
@@ -218,7 +225,7 @@ const UserDropdown = (props: TProps) => {
           </Box>
         </Box>
         <Divider />
-        {permissionUser.length > 0 && (
+        {permissionUser.includes("SYSTEM.VIEW") && (
           <MenuItem onClick={handleNavigateManageSystem}>
             <Avatar>
               <Icon icon='arcticons:phone-manager' />

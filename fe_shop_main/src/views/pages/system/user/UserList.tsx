@@ -314,11 +314,13 @@ const UserListPage: NextPage<TProps> = () => {
           <>
             <GridEdit
               disabled={!UPDATE}
-              onClick={() =>
+              onClick={() => {
+                console.log(">>check update")
                 setOpenCreateEdit({
                   open: true,
                   id: String(params.id)
                 })
+              }
               }
             />
             <GridDelete
@@ -467,7 +469,7 @@ const UserListPage: NextPage<TProps> = () => {
       toast.error(t('Delete_user_error'))
       dispatch(resetInitialState())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessDelete, isErrorDelete, messageErrorDelete])
 
   const dataListUser = [

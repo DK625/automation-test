@@ -11,6 +11,7 @@ const dotenv = require("dotenv");
 const { addToBlacklist, isAdminPermission } = require("../utils");
 dotenv.config();
 const moment = require("moment/moment");
+const Role = require("../models/RoleModel");
 
 const registerUser = (newUser) => {
   return new Promise(async (resolve, reject) => {
@@ -29,11 +30,19 @@ const registerUser = (newUser) => {
         });
       }
       const hash = bcrypt.hashSync(password, 10);
+
+      // create default role for user 
+
+      // check if the role is exists
+      const roleExist = await Role.findOne({ name: 'User' });
+      let role = roleExist ? roleExist._id : await Role.create({ name: "User", permissions: CONFIG_PERMISSIONS.USER });
+
       const createdUser = await User.create({
         email,
         password: hash,
         status: 1,
         userType: CONFIG_USER_TYPE.DEFAULT,
+        role: role._id
       });
       if (createdUser) {
         resolve({
@@ -205,22 +214,22 @@ const updateAuthMe = (id, data, isPermission) => {
         }
       }
 
-      if(data.city) {
+      if (data.city) {
         checkUser.city = data.city
       }
 
-      if(data.role) {
+      if (data.role) {
         checkUser.role = data.role
       }
 
-      checkUser.firstName =data.firstName
-      checkUser.lastName =data.lastName
-      checkUser.middleName =data.middleName
-      checkUser.email =data.email || checkUser.email
+      checkUser.firstName = data.firstName
+      checkUser.lastName = data.lastName
+      checkUser.middleName = data.middleName
+      checkUser.email = data.email || checkUser.email
       checkUser.phoneNumber = data.phoneNumber
-      checkUser.avatar =data.avatar
-      checkUser.address =data.address
-      checkUser.addresses =data.addresses || checkUser.addresses
+      checkUser.avatar = data.avatar
+      checkUser.address = data.address
+      checkUser.addresses = data.addresses || checkUser.addresses
       await checkUser.save()
 
       resolve({
@@ -239,7 +248,7 @@ const updateAuthMe = (id, data, isPermission) => {
 const updateDeviceToken = (id, data, isPermission) => {
   return new Promise(async (resolve, reject) => {
     try {
-    const {  deviceToken } = data;
+      const { deviceToken } = data;
       const checkUser = await User.findOne({
         _id: id,
       })
@@ -532,7 +541,7 @@ const registerGoogle = (idToken) => {
 const loginGoogle = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const { idToken, deviceToken = "" } =data;
+      const { idToken, deviceToken = "" } = data;
       const payload = await verifyGoogleIdToken(idToken);
       if (!payload) {
         resolve({

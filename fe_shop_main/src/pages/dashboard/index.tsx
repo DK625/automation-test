@@ -8,7 +8,7 @@ import DashboardPage from 'src/views/pages/dashboard'
 type TProps = {}
 
 const Index: NextPage<TProps> = () => {
- 
+
 
   return <DashboardPage />
 }

@@ -165,7 +165,7 @@ const MyProfilePage: NextPage<TProps> = () => {
 
   useEffect(() => {
     fetchGetAuthMe()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i18n.language])
 
   useEffect(() => {
@@ -178,7 +178,7 @@ const MyProfilePage: NextPage<TProps> = () => {
       }
       dispatch(resetInitialState())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isErrorUpdateMe, isSuccessUpdateMe, messageUpdateMe])
 
   useEffect(() => {
@@ -284,7 +284,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
                         required
-                        
+
                         fullWidth
                         disabled
                         label={t('Email')}
@@ -368,7 +368,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
-                        
+
                         fullWidth
                         label={t('Full_name')}
                         onChange={onChange}
@@ -388,7 +388,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     name='address'
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
-                        
+
                         fullWidth
                         label={t('Address')}
                         onChange={onChange}
@@ -447,7 +447,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
                         required
-                        
+
                         fullWidth
                         label={t('Phone_number')}
                         onChange={e => {

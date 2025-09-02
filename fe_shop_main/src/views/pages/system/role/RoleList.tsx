@@ -27,7 +27,7 @@ import { deleteRole, getAllRoles, getDetailsRole, updateRole } from 'src/service
 // ** Others
 import toast from 'react-hot-toast'
 import { PERMISSIONS } from 'src/configs/permission'
-import { getAllValueOfObject } from 'src/utils'
+import { getAllValueOfObject, getAllValueOfObjectNotExclude } from 'src/utils'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 // ** Hooks
@@ -154,7 +154,7 @@ const RoleListPage: NextPage<TProps> = () => {
 
   const handleDeleteRole = useCallback(() => {
     mutateDeleteRole(openDeleteRole.id)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openDeleteRole.id])
 
   const columns: GridColDef[] = [
@@ -174,7 +174,7 @@ const RoleListPage: NextPage<TProps> = () => {
 
         return (
           <Box sx={{ width: '100%' }}>
-            {!row?.permissions?.some((per: string) => ['ADMIN.GRANTED', 'BASIC.PUBLIC']?.includes(per)) ? (
+            {!row?.permissions?.some((per: string) => ['ADMIN.GRANTED', 'USER', 'BASIC.PUBLIC', 'SYSTEM.VIEW']?.includes(per)) ? (
               <>
                 <GridEdit
                   disabled={!UPDATE}
@@ -221,7 +221,13 @@ const RoleListPage: NextPage<TProps> = () => {
           } else if (res?.data.permissions.includes(PERMISSIONS.BASIC)) {
             setIsDisabledPermission(true)
             setPermissionSelected((PERMISSIONS as any)?.DASHBOARD)
-          } else {
+          } else if (res?.data.permissions.includes(PERMISSIONS.USER)) {
+            setIsDisabledPermission(true)
+            setPermissionSelected((PERMISSIONS as any)?.USER)
+          } else if (res?.data.permissions.includes("SYSTEM.VIEW")) {
+            setPermissionSelected(getAllValueOfObjectNotExclude([PERMISSIONS.DASHBOARD, PERMISSIONS.MANAGE_ORDER, PERMISSIONS.MANAGE_PRODUCT, PERMISSIONS.SETTING.PAYMENT_TYPE, PERMISSIONS.SETTING.DELIVERY_TYPE]))
+          }
+          else {
             setIsDisabledPermission(false)
             setPermissionSelected(res?.data?.permissions || [])
           }

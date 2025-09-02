@@ -21,7 +21,9 @@ export const createUserAsync = createAsyncThunk(`${serviceName}/create`, async (
 })
 
 export const updateUserAsync = createAsyncThunk(`${serviceName}/update`, async (data: TParamsEditUser) => {
+
   const response = await updateUser(data)
+
 
   return response
 })

@@ -28,7 +28,8 @@ const CONFIG_MESSAGE_ERRORS = {
 const CONFIG_PERMISSIONS = {
   ADMIN: "ADMIN.GRANTED",
   BASIC: "BASIC.PUBLIC",
-  DASHBOARD: 'DASHBOARD',
+  DASHBOARD: "DASHBOARD",
+  USER: "USER",
   MANAGE_PRODUCT: {
     PRODUCT: {
       CREATE: "MANAGE_PRODUCT.PRODUCT.CREATE",
@@ -123,8 +124,8 @@ const ACTION_NOTIFICATION_ORDER = {
   DONE_ORDER: "Done_order",
   IS_DELIVERED: "Is_delivered",
   IS_PAID: "Is_paid",
-  PAYMENT_VN_PAY_SUCCESS:"Payment_vn_pay_success",
-  PAYMENT_VN_PAY_ERROR:"Payment_vn_pay_error",
+  PAYMENT_VN_PAY_SUCCESS: "Payment_vn_pay_success",
+  PAYMENT_VN_PAY_ERROR: "Payment_vn_pay_error",
 }
 
 

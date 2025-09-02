@@ -22,7 +22,7 @@ const AuthPermission = (permission, isAuthMe, isPublic) => (req, res, next) => {
           token,
           process.env.ACCESS_TOKEN_SECRET,
           function (err, user) {
-          
+
             if (err) {
               return handleUnauthorizedError(res);
             }

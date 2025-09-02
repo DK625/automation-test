@@ -122,6 +122,7 @@ const CreateEditUser = (props: TCreateEditUser) => {
 
       if (idUser) {
         // update
+
         dispatch(
           updateUserAsync({
             firstName,
@@ -231,7 +232,7 @@ const CreateEditUser = (props: TCreateEditUser) => {
   }, [open, idUser])
 
   useEffect(() => {
-    if(open) {
+    if (open) {
       fetchAllRoles()
       fetchAllCities()
     }

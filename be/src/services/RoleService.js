@@ -56,14 +56,16 @@ const updateRole = (id, data) => {
       if (
         checkRole.permissions.includes(CONFIG_PERMISSIONS.ADMIN) ||
         checkRole.permissions.includes(CONFIG_PERMISSIONS.BASIC) ||
+        checkRole.permissions.includes(CONFIG_PERMISSIONS.USER) ||
         checkRole.name === "Admin" ||
-        checkRole.name === "Basic"
+        checkRole.name === "Basic" ||
+        checkRole.name === "User"
       ) {
         resolve({
           status: CONFIG_MESSAGE_ERRORS.INVALID.status,
           statusMessage: "Error",
           typeError: CONFIG_MESSAGE_ERRORS.INVALID.type,
-          message: `You can't update permission with admin or basic role`,
+          message: `You can't update permission with admin or basic role or user role `,
           data: null,
         });
         return;
@@ -153,7 +155,7 @@ const getAllRole = (params) => {
     try {
       const limit = params?.limit ? +params?.limit : 10;
       const search = params?.search ?? "";
-      const page = params?.page ?  +params.page :  1;
+      const page = params?.page ? +params.page : 1;
       const order = params?.order ?? "createdAt desc";
       const query = {};
       if (search) {

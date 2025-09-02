@@ -1,17 +1,17 @@
-import {Box, useTheme} from "@mui/material"
-import {TCountProductType} from "src/views/pages/dashboard"
+import { Box, useTheme } from "@mui/material"
+import { TCountProductType } from "src/views/pages/dashboard"
 
-import {Bar} from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import 'chart.js/auto';
-import {useMemo} from "react";
-import {useTranslation} from "react-i18next";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import LineChart from "src/views/pages/dashboard/components/Chart";
 
 interface TProps {
     data: TCountProductType[]
 }
 
-const CardMonthlyIncomeByRevenue = ({rawData}: any) => {
+const CardMonthlyIncomeByRevenue = ({ rawData }: any) => {
 
     // Props
     // const {data} = props
@@ -23,20 +23,20 @@ const CardMonthlyIncomeByRevenue = ({rawData}: any) => {
     //     return data?.map((item) => item?.typeName)
     // }, [data])
     //
-    const data = {
-        labels: rawData.map((record: any) => record.type)
-        , // X-axis labels
+    const data = rawData?.length ? {
+        labels: rawData.map((record: any) => record.type),
         datasets: [
             {
                 label: 'Monthly Sales (VND)',
                 data: rawData.map((item: any) => item.totalRevenue),
-                borderColor: 'rgba(75, 192, 192, 1)', // Line color
-                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Fill under the line
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
                 tension: 0,
             },
         ],
-    };
-    console.log({rawData});
+    } : { labels: [], datasets: [] };
+
+    console.log({ rawData });
 
     const options = {
         responsive: true,
@@ -71,7 +71,7 @@ const CardMonthlyIncomeByRevenue = ({rawData}: any) => {
                 }
             }}
         >
-            <LineChart data={data} options={options}/>
+            <LineChart data={data} options={options} />
         </Box>
     )
 }
