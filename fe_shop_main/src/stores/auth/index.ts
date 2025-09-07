@@ -28,7 +28,7 @@ type TInitialData = {
   isErrorForgotPassword: boolean,
   messageForgotPassword: string,
 }
-const initialState:TInitialData = {
+const initialState: TInitialData = {
   isLoading: false,
   isSuccess: true,
   isError: false,
@@ -171,8 +171,8 @@ export const authSlice = createSlice({
       state.messageChangePassword = ''
     })
 
-     // ** reset password
-     builder.addCase(resetPasswordAuthAsync.pending, (state, action) => {
+    // ** reset password
+    builder.addCase(resetPasswordAuthAsync.pending, (state, action) => {
       state.isLoading = true
     })
     builder.addCase(resetPasswordAuthAsync.fulfilled, (state, action) => {
@@ -190,8 +190,8 @@ export const authSlice = createSlice({
       state.typeError = ''
     })
 
-     // ** forgot password
-     builder.addCase(forgotPasswordAuthAsync.pending, (state, action) => {
+    // ** forgot password
+    builder.addCase(forgotPasswordAuthAsync.pending, (state, action) => {
       state.isLoading = true
     })
     builder.addCase(forgotPasswordAuthAsync.fulfilled, (state, action) => {

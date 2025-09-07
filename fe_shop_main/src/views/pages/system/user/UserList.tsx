@@ -315,7 +315,6 @@ const UserListPage: NextPage<TProps> = () => {
             <GridEdit
               disabled={!UPDATE}
               onClick={() => {
-                console.log(">>check update")
                 setOpenCreateEdit({
                   open: true,
                   id: String(params.id)

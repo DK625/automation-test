@@ -126,7 +126,12 @@ const CardProduct = (props: TCardProduct) => {
 
   return (
     <StyleCard sx={{ width: '100%' }}>
-      <CardMedia component='img' height='194' image={item.image} alt='image' />
+      <CardMedia component='img' height='194' image={item.image} alt='image'
+        sx={{
+          objectFit: 'container !important',
+          padding: '2px',
+
+        }} />
       <CardContent sx={{ padding: '8px 12px' }}>
         <Typography
           onClick={() => handleNavigateDetails(item.slug)}

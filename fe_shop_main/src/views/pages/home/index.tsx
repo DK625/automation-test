@@ -268,7 +268,6 @@ const HomePage: NextPage<TProps> = props => {
       >
         <StyledTabs value={productTypeSelected} onChange={handleChange} aria-label='wrapped label tabs example'>
           {optionTypes.map(opt => {
-            console.log('optionTypes: ', optionTypes)
             return (
               <Tab
                 key={opt.value}
@@ -379,10 +378,12 @@ const HomePage: NextPage<TProps> = props => {
                   }}
                 >
                   {productsPublic?.data?.length > 0 ? (
+
                     <>
                       {productsPublic?.data?.map((item: TProduct) => {
                         return (
-                          <Grid item key={item._id} md={4} sm={6} xs={12}>
+                          <Grid item key={item._id} md={3} sm={6} xs={12}>
+
                             <CardProduct item={item} />
                           </Grid>
                         )

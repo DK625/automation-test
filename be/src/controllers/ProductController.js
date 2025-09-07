@@ -24,7 +24,7 @@ const createProduct = async (req, res) => {
         message: `The field ${requiredFields.join(", ")} is required`,
         data: null,
       });
-    } 
+    }
     if (!discountValidation.isValid) {
       return res.status(CONFIG_MESSAGE_ERRORS.INVALID.status).json({
         status: "Error",
@@ -82,7 +82,7 @@ const updateProduct = async (req, res) => {
         message: `The field ${requiredFields.join(", ")} is required`,
         data: null,
       });
-    }  
+    }
     if (!discountValidation.isValid) {
       return res.status(CONFIG_MESSAGE_ERRORS.INVALID.status).json({
         status: "Error",
@@ -128,7 +128,7 @@ const getDetailsProduct = async (req, res) => {
       status: statusMessage,
     });
   } catch (e) {
-    console.log("products", {e})
+    console.log("products", { e })
     return res.status(CONFIG_MESSAGE_ERRORS.INTERNAL_ERROR.status).json({
       message: "Internal Server Error",
       data: null,
@@ -178,6 +178,7 @@ const getDetailsProductPublicBySlug = async (req, res) => {
     const slugId = req.params.slug;
     const userId = req?.userId;
     const params = req.query;
+
 
     if (!slugId) {
       return res.status(CONFIG_MESSAGE_ERRORS.INVALID.status).json({

@@ -87,7 +87,7 @@ export const getDetailsProductPublic = async (id: string) => {
   }
 }
 
-export const getDetailsProductPublicBySlug = async (slug: string, isViewed?:boolean) => {
+export const getDetailsProductPublicBySlug = async (slug: string, isViewed?: boolean) => {
   try {
     const data = { params: { isPublic: true, isViewed } }
 

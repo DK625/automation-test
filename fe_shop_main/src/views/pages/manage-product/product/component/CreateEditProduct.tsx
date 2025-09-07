@@ -1,10 +1,10 @@
 // ** React
-import React, {useEffect, useState} from 'react'
-import {useTranslation} from 'react-i18next'
+import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // ** Form
-import {yupResolver} from '@hookform/resolvers/yup'
-import {Controller, useForm} from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { Controller, useForm } from 'react-hook-form'
 import * as yup from 'yup'
 
 // ** Mui
@@ -31,22 +31,22 @@ import WrapperFileUpload from 'src/components/wrapper-file-upload'
 import CustomSelect from 'src/components/custom-select'
 
 // ** Services
-import {getDetailsUser} from 'src/services/user'
+import { getDetailsUser } from 'src/services/user'
 
 // ** Redux
-import {AppDispatch} from 'src/stores'
-import {useDispatch} from 'react-redux'
+import { AppDispatch } from 'src/stores'
+import { useDispatch } from 'react-redux'
 
 // ** Others
-import {convertBase64, convertHTMLToDraft, formatNumberToLocal, stringToSlug} from 'src/utils'
-import {createProductAsync, updateProductAsync} from 'src/stores/product/actions'
-import {getAllProductTypes} from 'src/services/product-type'
+import { convertBase64, convertHTMLToDraft, formatNumberToLocal, stringToSlug } from 'src/utils'
+import { createProductAsync, updateProductAsync } from 'src/stores/product/actions'
+import { getAllProductTypes } from 'src/services/product-type'
 import CustomDatePicker from 'src/components/custom-date-picker'
 import CustomEditor from 'src/components/custom-editor'
-import {EditorState, convertToRaw} from 'draft-js'
+import { EditorState, convertToRaw } from 'draft-js'
 import draftToHtml from 'draftjs-to-html'
-import {getDetailsProduct} from 'src/services/product'
-import {getAllCities} from 'src/services/city'
+import { getDetailsProduct } from 'src/services/product'
+import { getAllCities } from 'src/services/city'
 
 interface TCreateEditProduct {
     open: boolean
@@ -61,7 +61,7 @@ type TDefaultValue = {
     discount?: string
     price: string
     description: EditorState
-    slug: string
+    slug: string,
     countInStock: string
     status: number
     discountEndDate: Date | null
@@ -75,11 +75,11 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
     const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
 
     // ** Props
-    const {open, onClose, idProduct, optionTypes} = props
+    const { open, onClose, idProduct, optionTypes } = props
 
     // Hooks
     const theme = useTheme()
-    const {t, i18n} = useTranslation()
+    const { t, i18n } = useTranslation()
 
     // ** Redux
     const dispatch: AppDispatch = useDispatch()
@@ -160,7 +160,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
             .required(t('Required_field'))
             .test('least_count', t('least_1_in_count'), value => {
                 return Number(value) >= 1000
-            })
+            }),
     })
 
     const defaultValues: TDefaultValue = {
@@ -179,7 +179,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
     const {
         handleSubmit,
         control,
-        formState: {errors},
+        formState: { errors },
         reset,
         getValues,
         setError,
@@ -266,7 +266,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
 
     const fetchAllCities = async () => {
         setLoading(true)
-        await getAllCities({params: {limit: -1, page: -1}})
+        await getAllCities({ params: { limit: -1, page: -1 } })
             .then(res => {
                 const data = res?.data.cities
                 if (data) {
@@ -300,7 +300,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
 
     return (
         <>
-            {loading && <Spinner/>}
+            {loading && <Spinner />}
             <CustomModal open={open} onClose={onClose}>
                 <Box
                     sx={{
@@ -308,23 +308,23 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                         borderRadius: '15px',
                         backgroundColor: theme.palette.customColors.bodyBg
                     }}
-                    minWidth={{md: '800px', xs: '80vw'}}
-                    maxWidth={{md: '80vw', xs: '80vw'}}
+                    minWidth={{ md: '800px', xs: '80vw' }}
+                    maxWidth={{ md: '80vw', xs: '80vw' }}
                 >
-                    <Box sx={{display: 'flex', justifyContent: 'center', position: 'relative', paddingBottom: '20px'}}>
-                        <Typography variant='h4' sx={{fontWeight: 600}}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative', paddingBottom: '20px' }}>
+                        <Typography variant='h4' sx={{ fontWeight: 600 }}>
                             {' '}
                             {idProduct ? t('Edit_product') : t('Create_product')}
                         </Typography>
-                        <IconButton sx={{position: 'absolute', top: '-4px', right: '-10px'}} onClick={onClose}>
-                            <Icon icon='material-symbols-light:close' fontSize={'30px'}/>
+                        <IconButton sx={{ position: 'absolute', top: '-4px', right: '-10px' }} onClick={onClose}>
+                            <Icon icon='material-symbols-light:close' fontSize={'30px'} />
                         </IconButton>
                     </Box>
                     <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
-                        <Box sx={{backgroundColor: theme.palette.background.paper, borderRadius: '15px', py: 5, px: 4}}>
+                        <Box sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '15px', py: 5, px: 4 }}>
                             <Grid container spacing={5}>
                                 <Grid container item md={6} xs={12}>
-                                    <Box sx={{height: '100%', width: '100%'}}>
+                                    <Box sx={{ height: '100%', width: '100%' }}>
                                         <Grid container spacing={4}>
                                             <Grid item md={12} xs={12}>
                                                 <Box
@@ -338,7 +338,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                                         gap: 2
                                                     }}
                                                 >
-                                                    <Box sx={{position: 'relative'}}>
+                                                    <Box sx={{ position: 'relative' }}>
                                                         {imageProduct && (
                                                             <IconButton
                                                                 sx={{
@@ -352,14 +352,14 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                                                 color='inherit'
                                                                 onClick={() => setImageProduct('')}
                                                             >
-                                                                <Icon icon='material-symbols-light:delete-outline'/>
+                                                                <Icon icon='material-symbols-light:delete-outline' />
                                                             </IconButton>
                                                         )}
                                                         {imageProduct ? (
-                                                            <Avatar src={imageProduct} sx={{width: 100, height: 100}}/>
+                                                            <Avatar src={imageProduct} sx={{ width: 100, height: 100 }} />
                                                         ) : (
-                                                            <Avatar sx={{width: 100, height: 100}}>
-                                                                <Icon icon='fluent-mdl2:product-variant' fontSize={70}/>
+                                                            <Avatar sx={{ width: 100, height: 100 }}>
+                                                                <Icon icon='fluent-mdl2:product-variant' fontSize={70} />
                                                             </Avatar>
                                                         )}
                                                     </Box>
@@ -388,7 +388,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={12} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomTextField
                                                             required
                                                             fullWidth
@@ -415,7 +415,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={12} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomTextField
                                                             required
                                                             disabled
@@ -435,9 +435,9 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={6} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => {
+                                                    render={({ field: { onChange, onBlur, value } }) => {
                                                         return (
-                                                            <Box sx={{display: 'flex', flexDirection: 'column'}}>
+                                                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                                                 <InputLabel
                                                                     sx={{
                                                                         fontSize: '13px',
@@ -475,7 +475,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={6} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomTextField
                                                             required
                                                             fullWidth
@@ -495,7 +495,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                                 <Controller
                                                     control={control}
                                                     name='countInStock'
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomTextField
                                                             fullWidth
                                                             label={t('Count_in_stock')}
@@ -513,7 +513,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                                 <Controller
                                                     name='type'
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <Box>
                                                             <InputLabel
                                                                 sx={{
@@ -554,7 +554,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={6} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomTextField
                                                             fullWidth
                                                             label={t('Discount(percent)')}
@@ -580,7 +580,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={12} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomDatePicker
                                                             required
                                                             minDate={new Date()}
@@ -601,7 +601,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={12} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomDatePicker
                                                             required
                                                             onChange={(date: Date | null) => {
@@ -621,7 +621,7 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                             <Grid item md={12} xs={12}>
                                                 <Controller
                                                     control={control}
-                                                    render={({field: {onChange, onBlur, value}}) => (
+                                                    render={({ field: { onChange, onBlur, value } }) => (
                                                         <CustomEditor
                                                             onEditorStateChange={onChange}
                                                             label={`${t('Description')}`}
@@ -640,8 +640,8 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                                 </Grid>
                             </Grid>
                         </Box>
-                        <Box sx={{display: 'flex', justifyContent: 'flex-end'}}>
-                            <Button type='submit' variant='contained' sx={{mt: 3, mb: 2}}>
+                        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button type='submit' variant='contained' sx={{ mt: 3, mb: 2 }}>
                                 {!idProduct ? t('Create') : t('Update')}
                             </Button>
                         </Box>

@@ -1030,6 +1030,7 @@ const getListRelatedProductBySlug = (params) => {
       const query = {};
       query.status = 1;
 
+
       const checkProduct = await Product.findOne({ slug });
 
       if (checkProduct === null) {
@@ -1102,10 +1103,10 @@ const getListRelatedProductBySlug = (params) => {
           {
             $addFields: {
               averageRating: {
-                $ifNull: [{ $avg: { $ifNull: ["$reviews.star", 0] } }, 0],
-                totalReviews: { $size: "$reviews" },
+                $ifNull: [{ $avg: "$reviews.star" }, 0]
               },
-            },
+              totalReviews: { $size: "$reviews" }
+            }
           },
           {
             $lookup: {
@@ -1134,9 +1135,10 @@ const getListRelatedProductBySlug = (params) => {
             totalCount: totalCount,
           },
         });
+
         return;
       }
-    
+
       const pipeline = [
         { $match: query },
         { $sort: sortOptions },

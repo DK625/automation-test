@@ -65,6 +65,7 @@ const AuthProvider = ({ children }: Props) => {
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+      console.log(">>> check token : ", storedToken)
 
       if (storedToken) {
         setLoading(true)
@@ -114,7 +115,7 @@ const AuthProvider = ({ children }: Props) => {
   }
 
   const handleLoginGoogle = (params: LoginGoogleParams, errorCallback?: ErrCallbackType) => {
-    loginAuthGoogle({idToken: params.idToken, deviceToken: params.deviceToken})
+    loginAuthGoogle({ idToken: params.idToken, deviceToken: params.deviceToken })
       .then(async response => {
         if (params.rememberMe) {
           setLocalUserData(JSON.stringify(response.data.user), response.data.access_token, response.data.refresh_token)
@@ -137,7 +138,7 @@ const AuthProvider = ({ children }: Props) => {
 
 
   const handleLoginFacebook = (params: LoginFacebookParams, errorCallback?: ErrCallbackType) => {
-    loginAuthFacebook({idToken: params.idToken, deviceToken: params.deviceToken})
+    loginAuthFacebook({ idToken: params.idToken, deviceToken: params.deviceToken })
       .then(async response => {
         if (params.rememberMe) {
           setLocalUserData(JSON.stringify(response.data.user), response.data.access_token, response.data.refresh_token)

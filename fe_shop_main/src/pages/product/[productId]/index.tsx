@@ -17,7 +17,7 @@ type TProps = {
 
 const Index: NextPage<TProps> = ({ productData, listRelatedProduct }) => {
   const description = getTextFromHTML(productData.description)
-  
+
   return (
     <>
       <Head>
@@ -57,12 +57,13 @@ export async function getServerSideProps(context: any) {
   try {
     const slugId = context.query?.productId
     const res = await getDetailsProductPublicBySlug(
-      slugId, true
+      slugId
     )
-    const resRelated = await getListRelatedProductBySlug({ params: { slug: slugId } })
+    const resRelated = await getListRelatedProductBySlug({ params: { slug: slugId, page: -1, limit: -1 } })
+
 
     const productData = res?.data
-    const listRelatedProduct = resRelated?.data
+    const listRelatedProduct = resRelated?.data.products
 
     if (!productData?._id) {
       return {

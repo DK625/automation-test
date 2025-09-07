@@ -63,12 +63,12 @@ import { TCommentItemProduct } from 'src/types/comment'
 import { createCommentAsync } from 'src/stores/comments/actions'
 
 type TProps = {
-  productData:TProduct
+  productData: TProduct
   productsRelated: TProduct[]
 }
 
 
-const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) => {
+const DetailsProductPage: NextPage<TProps> = ({ productData, productsRelated }) => {
   // State
   const [loading, setLoading] = useState(false)
   const [dataProduct, setDataProduct] = useState<TProduct | any>({})
@@ -143,9 +143,9 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
       })
   }
 
-  const fetchListCommentProduct = async (productId:string) => {
+  const fetchListCommentProduct = async (productId: string) => {
     setLoading(true)
-    await getAllCommentsPublic({ params: { limit: -1, page: -1, order: "createdAt desc", isPublic: true, productId: productId} })
+    await getAllCommentsPublic({ params: { limit: -1, page: -1, order: "createdAt desc", isPublic: true, productId: productId } })
       .then(async response => {
         setLoading(false)
         const data = response?.data
@@ -351,17 +351,17 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
     return () => {
       socket.disconnect()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listComment])
 
   useEffect(() => {
-    if(productData?._id) {
+    if (productData?._id) {
       setDataProduct(productData)
     }
-  },[productData])
+  }, [productData])
 
   useEffect(() => {
-    if(productsRelated.length > 0) {
+    if (productsRelated.length > 0) {
       setRelatedProduct(productsRelated)
     }
   }, [productsRelated])
@@ -404,7 +404,7 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
       toast.error(t('Delete_review_error'))
       dispatch(resetInitialState())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessDelete, isErrorDelete, messageErrorDelete])
 
   useEffect(() => {
@@ -415,7 +415,7 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
       toast.error(t('Delete_comment_error'))
       dispatch(resetInitialStateComment())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessDeleteComment, isErrorDeleteComment, messageErrorDeleteComment])
 
   useEffect(() => {
@@ -427,7 +427,7 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
       toast.error(t('Create_comment_error'))
       dispatch(resetInitialStateComment())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessCreateComment, isErrorCreateComment, messageErrorCreateComment])
 
   useEffect(() => {
@@ -449,9 +449,8 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
       toast.error(t('Create_reply_error'))
       dispatch(resetInitialStateComment())
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessReply, isErrorReply, messageErrorReply])
-
   return (
     <>
       {(loading || isLoadingComment) && <Spinner />}
@@ -459,7 +458,7 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
         <Box
           marginTop={{ md: 5, xs: 4 }}
         >
-          <Typography sx={{ color: theme.palette.primary.main, fontWeight: "600", marginBottom: "8px"}}>{t("Product_details")}{" / "}{dataProduct.type?.name}{" "}/{" "}{dataProduct?.name}</Typography>
+          <Typography sx={{ color: theme.palette.primary.main, fontWeight: "600", marginBottom: "8px" }}>{t("Product_details")}{" / "}{dataProduct.type?.name}{" "}/{" "}{dataProduct?.name}</Typography>
         </Box>
         <Grid
           container
@@ -476,6 +475,7 @@ const DetailsProductPage: NextPage<TProps> = ({productData, productsRelated}) =>
                   src={dataProduct?.image}
                   alt='banner'
                   width={0}
+                  unoptimized ////////////
                   height={0}
                   style={{
                     height: '100%',
