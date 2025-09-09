@@ -1,0 +1,1 @@
+pytest cart_test_cases\cart_test_cases.py (cần active venv)

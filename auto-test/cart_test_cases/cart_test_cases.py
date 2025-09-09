@@ -61,7 +61,7 @@ class TestCart():
 
     def login(self):
         login_input = self.input_data['login']
-        self.driver.get("http://localhost:3000/home")
+        self.driver.get("http://14.225.44.169:3000/home")
         self.driver.maximize_window()
 
         # Click vào nút đăng nhập và chờ form login
