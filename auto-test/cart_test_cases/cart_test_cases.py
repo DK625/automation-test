@@ -3,10 +3,13 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as EC # the set of wait condition 
 from pymongo import MongoClient
 import json
 import os
+from selenium.webdriver.chrome.options import Options
+
+
 
 
 class TestCart():
@@ -42,7 +45,7 @@ class TestCart():
             assert condition, message
         except AssertionError as e:
             self.take_screenshot(f"failed_{screenshot_name}")
-            raise e
+            raise e # == throw 
 
     @classmethod
     def load_json(cls, filename):
