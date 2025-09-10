@@ -148,6 +148,7 @@ const CardProduct = (props: TCardProduct) => {
             minHeight: '48px',
             mb: 2
           }}
+
         >
           {item.name}
         </Typography>
@@ -161,6 +162,7 @@ const CardProduct = (props: TCardProduct) => {
                 textDecoration: 'line-through',
                 fontSize: '14px'
               }}
+              data-testid={`price-${item.name}`}
             >
               {formatNumberToLocal(item.price)} VND
             </Typography>
@@ -172,6 +174,7 @@ const CardProduct = (props: TCardProduct) => {
               fontWeight: 'bold',
               fontSize: '18px'
             }}
+            data-testid={`discount-${item.name}`}
           >
             {item.discount > 0 && memoIsExpiry ? (
               <>{formatNumberToLocal((item.price * (100 - item.discount)) / 100)}</>
