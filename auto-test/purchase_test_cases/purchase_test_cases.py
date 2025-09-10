@@ -54,7 +54,7 @@ class TestPurchase():
 
     def login(self):
         login_input = self.input_data['login']
-        self.driver.get("http://localhost:3000/home")
+        self.driver.get("http://14.225.44.169:3000/home")
         self.driver.maximize_window()
 
         # Click vào nút đăng nhập và chờ form login
@@ -86,29 +86,30 @@ class TestPurchase():
 
         for product in input_data['products']:
             # Click tab
-            tab = WebDriverWait(self.driver, 55).until(
+            tab = WebDriverWait(self.driver, 5).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='tab-{product['tab']}']"))
             )
+            
             tab.click()
             for product_name in product['items']:
-                add_button = WebDriverWait(self.driver, 35).until(
+                add_button = WebDriverWait(self.driver, 5).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='add-to-cart-{product_name}']"))
                 )
                 self.driver.execute_script("arguments[0].click();", add_button)
 
         # Click cart icon
-        cart_icon = WebDriverWait(self.driver, 55).until(
+        cart_icon = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--flowbite > path"))
         )
         cart_icon.click()
         time.sleep(1)
-        quantity_in_cart = int(WebDriverWait(self.driver, 55).until(
+        quantity_in_cart = int(WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBadge-badge"))
         ).text)
         assert (quantity_in_cart == 5, f"Expected 5 items in cart, got {quantity_in_cart}")
 
         # Go to cart page
-        cart_page_button = WebDriverWait(self.driver, 55).until(
+        cart_page_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-akzecb-MuiButtonBase-root-MuiButton-root"))
         )
         cart_page_button.click()
@@ -116,34 +117,30 @@ class TestPurchase():
         time.sleep(1)
         # Select all products
         # self.driver.find_element(By.CSS_SELECTOR, ".css-tfttuo .PrivateSwitchBase-input").click()
-        select_all = WebDriverWait(self.driver, 55).until(
+        select_all = WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".css-tfttuo .PrivateSwitchBase-input"))
         )
         select_all.click()
 
         # Proceed to checkout
-        checkout_button = WebDriverWait(self.driver, 55).until(
+        checkout_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))
         )
         checkout_button.click()
 
         # Change shipping address
-        change_address = WebDriverWait(self.driver, 55).until(
+        change_address = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-text"))
         )
+       
         self.driver.execute_script("arguments[0].click();", change_address)
 
-        WebDriverWait(self.driver, 35).until(
+        WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR,
-                                        ".MuiBox-root:nth-child(1) > .MuiFormControlLabel-root > .MuiTypography-root"))).click()  # choice current address
-        # need click manual if havent click
-        next_change_address = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root:nth-child(2)"))
-        )
-        next_change_address.click()
-
+                                        "form>div>div>div>button"))).click()  # choice current address
+       
         # Clear all input fields
-        input_fields = WebDriverWait(self.driver, 55).until(
+        input_fields = WebDriverWait(self.driver, 5).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input.MuiInputBase-input"))
         )
 
@@ -157,13 +154,13 @@ class TestPurchase():
                 field.send_keys("2")
 
         # Click confirm to show validation errors
-        confirm_button = WebDriverWait(self.driver, 55).until(
+        confirm_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root"))
         )
         confirm_button.click()
 
         # Verify error messages
-        error_messages = WebDriverWait(self.driver, 55).until(
+        error_messages = WebDriverWait(self.driver, 5).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiFormHelperText-root.Mui-error"))
         )
 
@@ -177,7 +174,7 @@ class TestPurchase():
             assert expected in actual_errors, f"Expected error message '{expected}' not found"
 
         # Close form
-        close_button = WebDriverWait(self.driver, 55).until(
+        close_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--material-symbols-light > path"))
         )
         close_button.click()
@@ -248,15 +245,15 @@ class TestPurchase():
                                          ".css-1lfi9f6-MuiButtonBase-root-MuiButton-root").click()  # add new address
         second_address = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][1]"))
+                (By.XPATH, "//input[@value='0']/following::span[contains(@class, 'MuiTypography-body1')][1]"))
         ).text
         third_address = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][2]"))
+                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][1]"))
         ).text
-        fourth_address = WebDriverWait(self.driver, 35).until(
+        fourth_address = WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][3]"))
+                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][2]"))
         ).text
 
         self.wrap_assert(second_address == input_data['expected_addresses'][0],
@@ -297,7 +294,7 @@ class TestPurchase():
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".css-1uimnmd-MuiButtonBase-root-MuiButton-root").click()  # update address
         # Lấy phần thông tin số điện thoại và tên
-        phone_name = WebDriverWait(self.driver, 35).until(
+        name_phone = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "p.MuiTypography-root.css-1wr5z0g-MuiTypography-root"))
         ).text
 
@@ -306,8 +303,8 @@ class TestPurchase():
             EC.presence_of_element_located((By.CSS_SELECTOR, "span.MuiTypography-root.css-1f0oh43-MuiTypography-root"))
         ).text
 
-        self.wrap_assert(phone_name + ' ' + address == input_data['expect_delivery_address'],
-                         f"Address mismatch. Expected: {input_data['expect_delivery_address']}, Got: '{phone_name + address}'",
+        self.wrap_assert(name_phone + ' ' + address == input_data['expect_delivery_address'],
+                         f"Address mismatch. Expected: {input_data['expect_delivery_address']}, Got: '{name_phone + address}'",
                          "delivery_address_check")
 
         print(f"""
@@ -316,7 +313,7 @@ class TestPurchase():
            Results:
            ✓ Successfully selected new delivery address
            ✓ Address Details:
-               - Contact: {phone_name}
+               - Contact: {name_phone}
                - Address: {address}
            ✓ Address information matches expected values
 
@@ -472,7 +469,7 @@ class TestPurchase():
         product_details = get_product_details()
 
         # Lấy phần thông tin số điện thoại và tên
-        phone_name = WebDriverWait(self.driver, 35).until(
+        name_phone = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "p.MuiTypography-root.css-1wr5z0g-MuiTypography-root"))
         ).text
 
@@ -594,18 +591,20 @@ class TestPurchase():
 
         order_summary = get_order_summary()
         # assert product_details == order_details, 'Product details and order detail mismatch'
+
         self.wrap_assert(address == order_summary['delivery_address'],
                          'Delivery address mismatch',
                          'delivery_address_match')
+
 
         self.wrap_assert(product_prices == order_prices,
                          'Price summary mismatch',
                          'price_summary_match')
 
-        # self.wrap_assert(phone_name == '0' + order_summary['phone'] + ' ' + order_summary['order_name'],
+        # self.wrap_assert(name_phone == '0' + order_summary['phone'] + ' ' + order_summary['order_name'],
         #                  'Phone number and name mismatch',
         #                  'contact_info_match')
-        self.wrap_assert(phone_name == order_summary['phone'] + ' ' + order_summary['order_name'],
+        self.wrap_assert(name_phone == order_summary['order_name'] + ' ' + order_summary['phone'],
                          'Phone number and name mismatch',
                          'contact_info_match')
         print(f"""
@@ -666,7 +665,7 @@ class TestPurchase():
         """
         try:
             # Find user
-            user = self.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
+            user = self.users_collection.find_one({"email": "lovecatdat@gmail.comm"})
             if not user:
                 raise AssertionError(f"{test_name}: User not found in database")
 
@@ -741,7 +740,7 @@ class TestPurchase():
         """
         try:
             # Find user
-            user = self.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
+            user = self.users_collection.find_one({"email": "lovecatdat@gmail.com"})
             if not user:
                 print(f"{test_name}: No user found to rollback")
                 return
@@ -794,7 +793,7 @@ class TestPurchase():
             if cls.users_collection is not None:
                 # Print before removal
                 time.sleep(3)
-                found_user = cls.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
+                found_user = cls.users_collection.find_one({"email": "lovecatdat@gmail.com"})
                 print("\nCurrent addresses in DB:", found_user.get('addresses'))
 
                 user_id = found_user['_id']
@@ -814,7 +813,7 @@ class TestPurchase():
                     print(f"No orders found for user {user_id}")
 
                 result = cls.users_collection.update_one(
-                    {"email": "doanthuyduong2103@gmail.com"},
+                    {"email": "lovecatdat@gmail.com"},
                     {
                         "$pull": {
                             "addresses": {
@@ -844,7 +843,7 @@ class TestPurchase():
                 )
 
                 # Print after removal to verify
-                found_user_after = cls.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
+                found_user_after = cls.users_collection.find_one({"email": "lovecatdat@gmail.com"})
                 print("Addresses after rollback:", found_user_after.get('addresses'))
         except Exception as e:
             print(f"MongoDB cleanup error: {str(e)}")

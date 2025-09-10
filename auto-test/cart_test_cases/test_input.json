@@ -1,23 +1,23 @@
 {
   "login": {
-    "username": "doanthuyduong2103@gmail.com",
-    "password": "Thanhthuy2103@"
+    "username": "lovecatdat@gmail.com",
+    "password": "123456@Dat"
   },
   "add_to_cart": [
     {
-      "Iphone 15 promax": {
+      "Tai nghe Bluetooth": {
         "increase_quantity": 10,
         "decrease_quantity": 2
       }
     },
     {
-      "Samsung Galaxy S23 8GB 128GB": {
+      "Ốp lưng điện thoại": {
         "increase_quantity": 5,
         "decrease_quantity": 1
       }
     },
     {
-      "Điện thoại Samsung Galaxy S24 Ultra 12/256GB - Hàng Chính Hãng 100%": {
+      "Đồng hồ thông minh": {
         "increase_quantity": 3,
         "decrease_quantity": 0
       }

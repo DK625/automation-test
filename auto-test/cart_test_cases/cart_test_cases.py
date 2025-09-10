@@ -187,34 +187,34 @@ class TestCart():
         )
         cart_icon.click()
 
-        cart_iphone_name = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located(
+        # all name of elements in the cart 
+        cart_elements_name = WebDriverWait(self.driver, 35).until(
+            EC.presence_of_all_elements_located(
                 (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-14n6xi8-MuiTypography-root"))
             # hoặc div, span chứa tên trong cart
-        ).text
-        print('cart_iphone_name:', cart_iphone_name)
-        cart_samsung_name = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-14n6xi8-MuiTypography-root"))
-        ).text
+        )
+
+        cart_iphone_name = cart_elements_name[0].text
+        cart_samsung_name = cart_elements_name[1].text
 
         cart_iphone_price = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-h4.css-txt9k1-MuiTypography-root"))
+                (By.CSS_SELECTOR, f"[data-testid='cart-product-price-{cart_iphone_name}']"))
             # hoặc div, span chứa giá trong cart
         ).text
         cart_samsung_price = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-h4.css-txt9k1-MuiTypography-root"))
+                (By.CSS_SELECTOR, f"[data-testid='cart-product-price-{cart_samsung_name}']"))
         ).text
+
         cart_iphone_quantity = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-rb4thv-MuiTypography-root b"))
+                (By.CSS_SELECTOR, f"[data-testid='cart-product-quantity-{cart_iphone_name}'] > b"))
         ).text
 
         cart_samsung_quantity = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-rb4thv-MuiTypography-root b"))
+                (By.CSS_SELECTOR, f"[data-testid='cart-product-quantity-{cart_samsung_name}'] > b"))
         ).text
         # lấy thông tin sản phẩm từ icon cart
 
@@ -223,34 +223,37 @@ class TestCart():
         )
         button.click()
 
-        iphone_name = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located(
+        # all name of the elements
+        elements_name = WebDriverWait(self.driver, 35).until(
+            EC.presence_of_all_elements_located(
                 (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-b5urwl-MuiTypography-root"))
             # hoặc tag h6, div chứa tên
-        ).text
-        print('iphone_name:', iphone_name)
+        )
+        iphone_name = elements_name[0].text # get text of element
+
+        
+
         iphone_price = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-h6.css-1pwfnb7-MuiTypography-root"))
+                (By.CSS_SELECTOR, f"[data-testid='price-{iphone_name}']"))
             # hoặc span, div chứa giá
         ).text
 
-        samsung_name = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-body1.css-b5urwl-MuiTypography-root"))
-        ).text
+        samsung_name = elements_name[1].text
         samsung_price = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.CSS_SELECTOR, ".MuiTypography-root.MuiTypography-h6.css-1pwfnb7-MuiTypography-root"))
+                (By.CSS_SELECTOR, f"[data-testid='price-{samsung_name}']"))
         ).text
 
-        iphone_quantity = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input"))
-        ).get_attribute('value')
+        # all quantity of the elements
+        elements_quantity = WebDriverWait(self.driver, 35).until(
+            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input"))
+        )
+        iphone_quantity = elements_quantity[0].get_attribute('value')
 
-        samsung_quantity = WebDriverWait(self.driver, 35).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "input[type='number'].MuiInputBase-input"))
-        ).get_attribute('value')
+        samsung_quantity = elements_quantity[1].get_attribute('value')
+
+        print ("Check match : ")
 
         # lấy thông tin sản phẩm từ trang chính cart
         self.wrap_assert(cart_iphone_name == iphone_name, "Product name mismatch", "iphone_info_name")
@@ -272,11 +275,11 @@ class TestCart():
                 """)
 
     def test_increase_decrease_quantity(self):
-        self.driver.get("http://localhost:3000/my-cart")
+        self.driver.get("http://14.225.44.169:3000/my-cart")
         input_data = self.input_data['add_to_cart']
         for product in input_data:
             product_name = list(product.keys())[0]
-            increase_button = WebDriverWait(self.driver, 35).until(
+            increase_button = WebDriverWait(self.driver, 15).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='increase-quantity-{product_name}']"))
             )
             decrease_button = WebDriverWait(self.driver, 35).until(
@@ -373,7 +376,7 @@ class TestCart():
             """)
 
     def test_delete_product(self):
-        self.driver.get("http://localhost:3000/my-cart")
+        self.driver.get("http://14.225.44.169:3000/my-cart")
 
         # Đợi trang load hoàn tất
         WebDriverWait(self.driver, 35).until(
