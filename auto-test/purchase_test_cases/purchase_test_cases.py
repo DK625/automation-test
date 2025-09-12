@@ -133,7 +133,7 @@ class TestPurchase():
         quantity_in_cart = int(WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBadge-badge"))
         ).text)
-        assert (quantity_in_cart == 5, f"Expected 5 items in cart, got {quantity_in_cart}")
+        assert quantity_in_cart == 5, f"Expected 5 items in cart, got {quantity_in_cart}"
 
         # Go to cart page
         cart_page_button = WebDriverWait(self.driver, 5).until(
