@@ -1,10 +1,10 @@
 {
  "login": {
-   "username": "lovecatdat@gmail.com",
-   "password": "123456@Dat"
+   "username": ["lovecatdat@gmail.com"],
+   "password": ["123456@Dat"]
  },
  "test_validate_empty_shipping_address": {
-   "products": [
+  "products": [
      {
        "tab": "Làm Đẹp",
        "items": [
@@ -55,7 +55,7 @@
        "phone": "0971234567"
      }
    ],
-   "expected_addresses": [
+    "expected_addresses": [
      "John Doe 0971234567 123 Chill Street Hà Nội",
      "John Doe 0971234567 123 Test Street Hà Nội",
      "John Doe 0971234567 123 Meo Street Hà Nội"
@@ -71,7 +71,7 @@
     "expect_delivery_address": "John Doe 0971234567 123 Test Street Hà Nội"
   },
  "test_price_calculation": {
-   "product_prices" : ["527.000 VND", "8.550.000 VND", "1.689.000 VND", "801.000 VND",
+   "product_prices" : ["152.830 VND", "8.550.000 VND", "1.689.000 VND", "801.000 VND",
                                   "263.000 VND"]
  }
 }

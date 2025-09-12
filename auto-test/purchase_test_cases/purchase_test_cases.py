@@ -1,3 +1,11 @@
+import os
+import sys 
+
+sys.path.append(os.path.expanduser('~/Documents/Web/automation-test/auto-test'))
+from gg_sheet.index import ConnectGoogleSheet
+from utils.index import parseSheetToObject
+from constant.index import PURCHASE_TEST_NAME
+
 from datetime import datetime
 
 from selenium import webdriver
@@ -6,11 +14,12 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+
 import time
 from pymongo import MongoClient
 import json
 import pytest
-import os
+
 
 
 class TestPurchase():
@@ -22,11 +31,15 @@ class TestPurchase():
         """Chạy một lần khi bắt đầu tất cả test cases"""
         cls.driver = webdriver.Chrome()
         cls.vars = {}
-        cls.input_data = cls.load_json('test_input.json')
+        cls.input_data = cls.load_json("test_input.json")
+        if (cls.input_data == None): 
+            print ("Not found json input file ")
+            return -1
+
         cls.test_failures_dir = "test_failures"
         os.makedirs(cls.test_failures_dir, exist_ok=True)
         try:
-            cls.mongo_client = MongoClient("mongodb://localhost:27017/")
+            cls.mongo_client = MongoClient("mongodb://localhost:27018/")
             cls.db = cls.mongo_client["test"]
             cls.users_collection = cls.db["users"]
             cls.orders_collection = cls.db["orders"]
@@ -36,8 +49,16 @@ class TestPurchase():
 
     @classmethod
     def load_json(cls, filename):
-        with open(filename, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        if not os.path.exists(filename):
+            print(f"⚠ File {filename} không tồn tại")
+            return None 
+
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"⚠ JSON lỗi: {e}")
+            return None
 
     def take_screenshot(self, name):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -67,13 +88,13 @@ class TestPurchase():
         email_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[aria-invalid='false']"))
         )
-        email_input.send_keys(login_input['username'])
+        email_input.send_keys(login_input['username'][0])
 
         # Nhập password - using MUI TextField selector with type='password'
         password_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[type='password']"))
         )
-        password_input.send_keys(login_input['password'])
+        password_input.send_keys(login_input['password'][0])
 
         submit_button = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))
@@ -83,7 +104,7 @@ class TestPurchase():
     def test_validate_empty_shipping_address_fields(self):
         self.login()
         input_data = self.input_data['test_validate_empty_shipping_address']
-
+        
         for product in input_data['products']:
             # Click tab
             tab = WebDriverWait(self.driver, 5).until(
@@ -392,6 +413,8 @@ class TestPurchase():
         product_prices_sum = sum(get_price_amount(price) for price in product_prices)
         shipping_fee_amount = get_price_amount(shipping_fee)
         total_amount_value = get_price_amount(total_amount)
+        print("Product price : ", product_prices)
+        print("product price input : ", input_data['product_prices'])
         self.wrap_assert(product_prices == input_data['product_prices'],
                          f"Product prices mismatch. Expected: {input_data['product_prices']}, Got: {product_prices}",
                          "product_prices_check")
@@ -578,6 +601,7 @@ class TestPurchase():
                     (By.CSS_SELECTOR, ".css-0 .MuiBox-root.css-1h7ftw7:nth-child(3) p.css-aofu14-MuiTypography-root"))
             ).text
 
+
             order_summary = {
                 "delivery_address": delivery_address,
                 "phone": phone,
@@ -591,7 +615,7 @@ class TestPurchase():
 
         order_summary = get_order_summary()
         # assert product_details == order_details, 'Product details and order detail mismatch'
-
+        
         self.wrap_assert(address == order_summary['delivery_address'],
                          'Delivery address mismatch',
                          'delivery_address_match')
@@ -654,6 +678,26 @@ class TestPurchase():
 
                        Status: PASSED ✅
                        """)
+    
+    def test_teardown_class(self):
+        test_addresses = [
+                {
+                    "firstName": address["name"].split(" ")[1],
+                    "lastName": address["name"].split(" ")[0],
+                    "address": address["address"],
+                    "phoneNumber": address["phone"]
+                } for address in self.input_data["test_multiple_addresses"]["addresses"]
+                
+            ]
+        
+        self.verify_database_state(PURCHASE_TEST_NAME, test_addresses)
+        self.rollback_database_changes(PURCHASE_TEST_NAME, test_addresses)
+        
+        
+
+        """Chỉ chạy sau khi tất cả test cases hoàn thành"""
+        if hasattr(self, 'driver'):  # Kiểm tra xem driver có tồn tại không
+            self.driver.quit()
 
     def verify_database_state(self, test_name, expected_state):
         """
@@ -665,7 +709,7 @@ class TestPurchase():
         """
         try:
             # Find user
-            user = self.users_collection.find_one({"email": "lovecatdat@gmail.comm"})
+            user = self.users_collection.find_one({"email": self.input_data["login"]["username"][0]})
             if not user:
                 raise AssertionError(f"{test_name}: User not found in database")
 
@@ -730,17 +774,20 @@ class TestPurchase():
         except Exception as e:
             self.take_screenshot("db_verification_error")
             raise AssertionError(f"{test_name}: Database verification failed - {str(e)}")
+        
 
-    def rollback_database_changes(self, test_name):
+    def rollback_database_changes(self, test_name, test_addresses):
         """
         Rolls back database changes made during test execution
 
         Args:
             test_name (str): Name of the test being rolled back
         """
+       
+
         try:
             # Find user
-            user = self.users_collection.find_one({"email": "lovecatdat@gmail.com"})
+            user = self.users_collection.find_one({"email": self.input_data["login"]["username"][0]})
             if not user:
                 print(f"{test_name}: No user found to rollback")
                 return
@@ -749,109 +796,41 @@ class TestPurchase():
             latest_order = self.orders_collection.find_one(
                 {"user": user['_id']},
                 sort=[("createdAt", -1)]
-            )
+            ) # get latest order and delete 
 
             if latest_order:
                 self.orders_collection.delete_one({"_id": latest_order["_id"]})
                 print(f"{test_name}: Rolled back latest order")
 
             # Rollback addresses
-            test_addresses = [
-                {
-                    "firstName": "Doe",
-                    "lastName": "John",
-                    "address": "123 Test Street",
-                    "phoneNumber": "0971234567"
-                },
-                {
-                    "firstName": "Doee",
-                    "lastName": "John",
-                    "address": "123 Test Street",
-                    "phoneNumber": "0971234567"
-                },
-                {
-                    "firstName": "ererDoe",
-                    "lastName": "John",
-                    "address": "123 Test Street",
-                    "phoneNumber": "0971234567"
-                }
-            ]
+            
 
-            update_result = self.users_collection.update_one(
-                {"_id": user['_id']},
-                {"$pull": {"addresses": {"$in": test_addresses}}}
-            )
+            # update_result = self.users_collection.update_one(
+            #     {"_id": user['_id']},
+            #     {"$pull": {"addresses": {"$in": test_addresses}}}
+            # ) # delete user have addresss in test_addresses 
+
+            for addr in test_addresses:
+                self.users_collection.update_one(
+                    {"_id": user["_id"]},
+                    {"$pull": {
+                        "addresses": {
+                            "address": addr["address"],
+                            "firstName": addr["firstName"],
+                            "lastName": addr["lastName"],
+                            "phoneNumber": addr["phoneNumber"]
+                        }
+                    }}
+                )
+
 
             print(f"{test_name}: Rolled back {update_result.modified_count} test addresses")
 
         except Exception as e:
             print(f"{test_name}: Rollback failed - {str(e)}")
-
-    @classmethod
-    def teardown_class(cls):
-        try:
-            if cls.users_collection is not None:
-                # Print before removal
-                time.sleep(3)
-                found_user = cls.users_collection.find_one({"email": "lovecatdat@gmail.com"})
-                print("\nCurrent addresses in DB:", found_user.get('addresses'))
-
-                user_id = found_user['_id']
-                latest_order = cls.orders_collection.find_one(
-                    {"user": user_id},
-                    sort=[("createdAt", -1)]
-                )
-
-                if latest_order:
-                    # Remove the latest order
-                    result = cls.orders_collection.delete_one({"_id": latest_order["_id"]})
-                    if result.deleted_count > 0:
-                        print(f"Rollback the most recent order for user {user_id}")
-                    else:
-                        print(f"Failed to delete the most recent order for user {user_id}")
-                else:
-                    print(f"No orders found for user {user_id}")
-
-                result = cls.users_collection.update_one(
-                    {"email": "lovecatdat@gmail.com"},
-                    {
-                        "$pull": {
-                            "addresses": {
-                                "$or": [
-                                    {
-                                        "firstName": "Doe",  # Changed from John
-                                        "lastName": "John",  # Changed from Doe
-                                        "address": "123 Test Street",
-                                        "phoneNumber": "0971234567"
-                                    },
-                                    {
-                                        "firstName": "Doee",  # Changed from John
-                                        "lastName": "John",  # Changed from Doee
-                                        "address": "123 Test Street",
-                                        "phoneNumber": "0971234567"
-                                    },
-                                    {
-                                        "firstName": "ererDoe",  # Changed from John
-                                        "lastName": "John",  # Changed from ererDoe
-                                        "address": "123 Test Street",
-                                        "phoneNumber": "0971234567"
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                )
-
-                # Print after removal to verify
-                found_user_after = cls.users_collection.find_one({"email": "lovecatdat@gmail.com"})
-                print("Addresses after rollback:", found_user_after.get('addresses'))
-        except Exception as e:
-            print(f"MongoDB cleanup error: {str(e)}")
         finally:
-            if cls.mongo_client:
-                cls.mongo_client.close()
+            if self.mongo_client:
+                self.mongo_client.close()
                 print("MongoDB connection closed")
 
-        """Chỉ chạy sau khi tất cả test cases hoàn thành"""
-        if hasattr(cls, 'driver'):  # Kiểm tra xem driver có tồn tại không
-            cls.driver.quit()
+   

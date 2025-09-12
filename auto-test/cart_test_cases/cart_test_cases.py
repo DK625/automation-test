@@ -74,13 +74,13 @@ class TestCart():
         email_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[aria-invalid='false']"))
         )
-        email_input.send_keys(login_input['username'])
+        email_input.send_keys(login_input['username'][0])
 
         # Nhập password - using MUI TextField selector with type='password'
         password_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[type='password']"))
         )
-        password_input.send_keys(login_input['password'])
+        password_input.send_keys(login_input['password'][0])
 
         submit_button = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))

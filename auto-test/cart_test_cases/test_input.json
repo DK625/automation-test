@@ -1,7 +1,7 @@
 {
   "login": {
-    "username": "lovecatdat@gmail.com",
-    "password": "123456@Dat"
+    "username": ["lovecatdat@gmail.com"],
+    "password": ["123456@Dat"]
   },
   "add_to_cart": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "Ốp lưng điện thoại": {
-        "increase_quantity": 5,
+      "increase_quantity": 5, 
         "decrease_quantity": 1
       }
     },
