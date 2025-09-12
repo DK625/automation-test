@@ -1,3 +1,15 @@
+import os
+import sys 
+
+base = os.getcwd()      
+path = os.path.dirname(base)              
+
+sys.path.append(path)
+
+from gg_sheet.index import ConnectGoogleSheet
+from utils.index import parseSheetToObjectCart
+from constant.index import CART_TEST_NAME, JSON_NAME
+
 from datetime import datetime
 
 from selenium import webdriver
@@ -21,7 +33,13 @@ class TestCart():
         """Chạy một lần khi bắt đầu tất cả test cases"""
         cls.driver = webdriver.Chrome()
         cls.vars = {}
-        cls.input_data = cls.load_json('test_input.json')
+
+        # load data from gg sheet 
+        cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
+        worksheet = cls.gg_sheet.loadSheet_WorkSheet("1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY", CART_TEST_NAME)
+        # parse object : 
+        cls.dataSheet = parseSheetToObjectCart(worksheet.get_all_values())
+
         cls.test_failures_dir = "test_failures"
         os.makedirs(cls.test_failures_dir, exist_ok=True)
 
@@ -60,7 +78,7 @@ class TestCart():
 
 
     def login(self):
-        login_input = self.input_data['login']
+        login_input = self.dataSheet['login']
         self.driver.get("http://14.225.44.169:3000/home")
         self.driver.maximize_window()
 
@@ -88,7 +106,7 @@ class TestCart():
         submit_button.click()
 
     def test_add_product_to_cart(self):
-        input_data = self.input_data['add_to_cart']
+        input_data = self.dataSheet['add_to_cart']
         self.login()
         cart_icon = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--flowbite > path"))
@@ -276,7 +294,7 @@ class TestCart():
 
     def test_increase_decrease_quantity(self):
         self.driver.get("http://14.225.44.169:3000/my-cart")
-        input_data = self.input_data['add_to_cart']
+        input_data = self.dataSheet['add_to_cart']
         for product in input_data:
             product_name = list(product.keys())[0]
             increase_button = WebDriverWait(self.driver, 15).until(
@@ -326,7 +344,7 @@ class TestCart():
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiBox-root.css-uz5qc span"))
         )
         checkboxes.click()  # Click vào tất cả các checkbox
-        input_data = self.input_data['add_to_cart']
+        input_data = self.dataSheet['add_to_cart']
         expected_total = 0
         for product in input_data:
             product_name = list(product.keys())[0]

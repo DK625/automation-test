@@ -1,10 +1,14 @@
 import os
 import sys 
 
-sys.path.append(os.path.expanduser('~/Documents/Web/automation-test/auto-test'))
+base = os.getcwd()     
+         
+path = os.path.dirname(base)
+sys.path.append(path)
+
 from gg_sheet.index import ConnectGoogleSheet
-from utils.index import parseSheetToObject
-from constant.index import PURCHASE_TEST_NAME
+from utils.index import parseSheetToObjectPurchase
+from constant.index import PURCHASE_TEST_NAME, JSON_NAME
 
 from datetime import datetime
 
@@ -31,10 +35,12 @@ class TestPurchase():
         """Chạy một lần khi bắt đầu tất cả test cases"""
         cls.driver = webdriver.Chrome()
         cls.vars = {}
-        cls.input_data = cls.load_json("test_input.json")
-        if (cls.input_data == None): 
-            print ("Not found json input file ")
-            return -1
+
+        # load data from gg sheet 
+        cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
+        worksheet = cls.gg_sheet.loadSheet_WorkSheet("1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY", PURCHASE_TEST_NAME)
+        # parse object : 
+        cls.dataSheet = parseSheetToObjectPurchase(worksheet.get_all_values())
 
         cls.test_failures_dir = "test_failures"
         os.makedirs(cls.test_failures_dir, exist_ok=True)
@@ -74,7 +80,7 @@ class TestPurchase():
             raise e
 
     def login(self):
-        login_input = self.input_data['login']
+        login_input = self.dataSheet['login']
         self.driver.get("http://14.225.44.169:3000/home")
         self.driver.maximize_window()
 
@@ -103,7 +109,7 @@ class TestPurchase():
 
     def test_validate_empty_shipping_address_fields(self):
         self.login()
-        input_data = self.input_data['test_validate_empty_shipping_address']
+        input_data = self.dataSheet['test_validate_empty_shipping_address']
         
         for product in input_data['products']:
             # Click tab
@@ -218,7 +224,7 @@ class TestPurchase():
         - Verifies form input matches displayed information
         - Checks address details inside and outside the form
         """
-        input_data = self.input_data['test_multiple_addresses']
+        input_data = self.dataSheet['test_multiple_addresses']
         change_button = WebDriverWait(self.driver, 55).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiButton-root"))
         )
@@ -309,7 +315,7 @@ class TestPurchase():
         - Verifies selected address matches display
         - Confirms address details consistency
         """
-        input_data = self.input_data['test_update_delivery_address_and_verify_display']
+        input_data = self.dataSheet['test_update_delivery_address_and_verify_display']
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".MuiBox-root:nth-child(2) > .MuiFormControlLabel-root > .MuiTypography-root").click()  # second choice address
         self.driver.find_element(By.CSS_SELECTOR,
@@ -348,7 +354,7 @@ class TestPurchase():
         - GHTK: Fixed 1,000 VND
         - Verifies fee display and total calculation
         """
-        input_data = self.input_data['test_shipping_fee']
+        input_data = self.dataSheet['test_shipping_fee']
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".MuiFormControlLabel-root:nth-child(2) .PrivateSwitchBase-input").click()  # change shoppe method
         shoppe_shipping_fee = WebDriverWait(self.driver, 35).until(
@@ -398,7 +404,7 @@ class TestPurchase():
             """Convert price string to integer"""
             return int(price_string.replace('VND', '').replace('.', '').strip())
 
-        input_data = self.input_data['test_price_calculation']
+        input_data = self.dataSheet['test_price_calculation']
         # Then use it
         product_prices = [
             get_product_price(item)
@@ -686,7 +692,7 @@ class TestPurchase():
                     "lastName": address["name"].split(" ")[0],
                     "address": address["address"],
                     "phoneNumber": address["phone"]
-                } for address in self.input_data["test_multiple_addresses"]["addresses"]
+                } for address in self.dataSheet["test_multiple_addresses"]["addresses"]
                 
             ]
         
@@ -709,7 +715,7 @@ class TestPurchase():
         """
         try:
             # Find user
-            user = self.users_collection.find_one({"email": self.input_data["login"]["username"][0]})
+            user = self.users_collection.find_one({"email": self.dataSheet["login"]["username"][0]})
             if not user:
                 raise AssertionError(f"{test_name}: User not found in database")
 
@@ -787,7 +793,7 @@ class TestPurchase():
 
         try:
             # Find user
-            user = self.users_collection.find_one({"email": self.input_data["login"]["username"][0]})
+            user = self.users_collection.find_one({"email": self.dataSheet["login"]["username"][0]})
             if not user:
                 print(f"{test_name}: No user found to rollback")
                 return
