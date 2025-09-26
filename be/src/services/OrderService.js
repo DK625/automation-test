@@ -4,7 +4,7 @@ const {
 const Order = require("../models/OrderProduct");
 const Product = require("../models/ProductModel");
 const EmailService = require("../services/EmailService");
-const {preparePaginationAndSorting, buildQuery} = require("../utils");
+const { preparePaginationAndSorting, buildQuery } = require("../utils");
 const mongoose = require("mongoose");
 const PaymentType = require("../models/PaymentType");
 const {
@@ -16,8 +16,8 @@ const updateProductStock = async (order) => {
     try {
         const productData = await Product.findOneAndUpdate({
             _id: order.product,
-            countInStock: {$gte: order.amount}
-        }, {$inc: {countInStock: -order.amount, sold: +order.amount}}, {new: true});
+            countInStock: { $gte: order.amount }
+        }, { $inc: { countInStock: -order.amount, sold: +order.amount } }, { new: true });
 
         if (productData) {
             return {
@@ -98,18 +98,18 @@ const createOrder = (newOrder) => {
                         dataCreate.status = 0;
                     }
                 }
-                console.log({dataCreate});
+                console.log({ dataCreate });
                 const createdOrder = await Order.create(dataCreate);
-                const {recipientIds, deviceTokens} = await getUserAndAdminTokens(createdOrder.user.toString());
+                const { recipientIds, deviceTokens } = await getUserAndAdminTokens(createdOrder.user.toString());
 
-            //await pushNotification({
-            //context: CONTEXT_NOTIFICATION.ORDER,
-            //title: ACTION_NOTIFICATION_ORDER.CREATE_ORDER,
-            //body: `Đơn hàng với id ${createdOrder?._id?.toString()} đã được đặt thành công`,
-            //referenceId: createdOrder?._id?.toString(),
-            //recipientIds,
-            //deviceTokens,
-            //                ////// await EmailService.sendEmailCreateOrder(email, orderItems);
+                //await pushNotification({
+                //context: CONTEXT_NOTIFICATION.ORDER,
+                //title: ACTION_NOTIFICATION_ORDER.CREATE_ORDER,
+                //body: `Đơn hàng với id ${createdOrder?._id?.toString()} đã được đặt thành công`,
+                //referenceId: createdOrder?._id?.toString(),
+                //recipientIds,
+                //deviceTokens,
+                //                ////// await EmailService.sendEmailCreateOrder(email, orderItems);
 
                 if (createdOrder) {
                     resolve({
@@ -284,7 +284,7 @@ const updateStatusOrder = (id, data) => {
             const savedOrder = await existingOrder.save();
 
             if (data.isPaid) {
-                const {recipientIds, deviceTokens} = await getUserAndAdminTokens(existingOrder?.user?.toString());
+                const { recipientIds, deviceTokens } = await getUserAndAdminTokens(existingOrder?.user?.toString());
 
                 await pushNotification({
                     context: CONTEXT_NOTIFICATION.ORDER,
@@ -295,7 +295,7 @@ const updateStatusOrder = (id, data) => {
                     deviceTokens,
                 });
             } else if (data.isDelivered) {
-                const {recipientIds, deviceTokens} = await getUserAndAdminTokens(existingOrder?.user?.toString());
+                const { recipientIds, deviceTokens } = await getUserAndAdminTokens(existingOrder?.user?.toString());
 
                 await pushNotification({
                     context: CONTEXT_NOTIFICATION.ORDER,
@@ -306,7 +306,7 @@ const updateStatusOrder = (id, data) => {
                     deviceTokens,
                 });
             } else if (data.status) {
-                const {recipientIds, deviceTokens} = await getUserAndAdminTokens(existingOrder?.user?.toString());
+                const { recipientIds, deviceTokens } = await getUserAndAdminTokens(existingOrder?.user?.toString());
 
                 const mapStatus = {
                     0: ACTION_NOTIFICATION_ORDER.WAIT_PAYMENT,
@@ -366,7 +366,7 @@ const cancelOrder = (orderId) => {
 
             order.status = 3;
             await order.save();
-            const {recipientIds, deviceTokens} = await getUserAndAdminTokens(order.user.toString());
+            const { recipientIds, deviceTokens } = await getUserAndAdminTokens(order.user.toString());
             await pushNotification({
                 context: CONTEXT_NOTIFICATION.ORDER,
                 title: ACTION_NOTIFICATION_ORDER.CANCEL_ORDER,
@@ -403,31 +403,31 @@ const getAllOrder = (params) => {
             const query = {};
 
             if (search) {
-                const searchRegex = {$regex: search, $options: "i"};
+                const searchRegex = { $regex: search, $options: "i" };
 
-                query.$or = [{"orderItems.name": searchRegex}];
+                query.$or = [{ "orderItems.name": searchRegex }];
             }
 
-            const {startIndex, sortOptions} = preparePaginationAndSorting(page, limit, order);
+            const { startIndex, sortOptions } = preparePaginationAndSorting(page, limit, order);
 
             if (userId) {
                 const userIds = userId
                     ?.split("|")
                     .map((id) => mongoose.Types.ObjectId(id));
-                query.user = userIds.length > 1 ? {$in: userIds} : mongoose.Types.ObjectId(userId);
+                query.user = userIds.length > 1 ? { $in: userIds } : mongoose.Types.ObjectId(userId);
             }
 
             if (productId) {
                 const productIds = productId
                     ?.split("|")
                     .map((id) => mongoose.Types.ObjectId(id));
-                query.product = productIds.length > 1 ? {$in: productIds} : mongoose.Types.ObjectId(productId);
+                query.product = productIds.length > 1 ? { $in: productIds } : mongoose.Types.ObjectId(productId);
             }
             if (cityId) {
                 const cityIds = cityId
                     ?.split("|")
                     .map((id) => mongoose.Types.ObjectId(id));
-                query["shippingAddress.city"] = cityIds.length > 1 ? {$in: cityIds} : mongoose.Types.ObjectId(cityId);
+                query["shippingAddress.city"] = cityIds.length > 1 ? { $in: cityIds } : mongoose.Types.ObjectId(cityId);
             }
 
             if (status) {
@@ -509,15 +509,15 @@ const getAllOrderOfMe = (userId, params) => {
             query.user = mongoose.Types.ObjectId(userId);
 
             if (search) {
-                const searchRegex = {$regex: search, $options: "i"};
+                const searchRegex = { $regex: search, $options: "i" };
 
-                query.$or = [{"orderItems.name": searchRegex}];
+                query.$or = [{ "orderItems.name": searchRegex }];
             }
-            const {startIndex, sortOptions} = preparePaginationAndSorting(page, limit, order);
+            const { startIndex, sortOptions } = preparePaginationAndSorting(page, limit, order);
 
             if (product) {
                 if (Array.isArray(product)) {
-                    query.product = {$in: product};
+                    query.product = { $in: product };
                 } else {
                     query.product = product;
                 }
@@ -525,7 +525,7 @@ const getAllOrderOfMe = (userId, params) => {
 
             if (status) {
                 if (Array.isArray(status)) {
-                    query.status = {$in: status};
+                    query.status = { $in: status };
                 } else {
                     query.status = status;
                 }
@@ -663,7 +663,7 @@ const cancelOrderOfMe = (userId, orderId) => {
             checkOrder.status = 3;
             await checkOrder.save();
 
-            const {recipientIds, deviceTokens} = await getUserAndAdminTokens(checkOrder.user.toString());
+            const { recipientIds, deviceTokens } = await getUserAndAdminTokens(checkOrder.user.toString());
 
             await pushNotification({
                 context: CONTEXT_NOTIFICATION.ORDER,

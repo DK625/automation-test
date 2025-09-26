@@ -179,7 +179,7 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
                 fontSize: '18px'
               }}
             >
-              {formatNumberToLocal((itemState.price * (100 - itemState.discount)) / 100)}
+              {formatNumberToLocal((itemState.price * (100 - itemState.discount)) / 100)} VND
             </Typography>
           )}
           {itemState.discount > 0 && (

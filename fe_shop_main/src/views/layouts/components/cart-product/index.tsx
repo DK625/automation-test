@@ -158,7 +158,7 @@ const CartProduct = (props: TProps) => {
                 return (
                   <StyleMenuItem key={item.product} onClick={() => handleNavigateDetailsProduct(item.slug)}>
                     <Avatar src={item.image} sx={{ height: '60px !important', width: '60px !important' }} />
-                    <Box style={{flex: 1}}>
+                    <Box style={{ flex: 1 }}>
                       <Typography sx={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {item.name}
                       </Typography>
@@ -173,6 +173,7 @@ const CartProduct = (props: TProps) => {
                                 textDecoration: 'line-through',
                                 fontSize: '10px'
                               }}
+                              data-testid={`cart-product-price-${item.name}`}
                             >
                               {formatNumberToLocal(item.price)} VND
                             </Typography>
@@ -184,6 +185,7 @@ const CartProduct = (props: TProps) => {
                               fontWeight: 'bold',
                               fontSize: '12px'
                             }}
+                            data-testid={`cart-product-discount-price-${item.name}`}
                           >
                             {item.discount > 0 ? (
                               <>{formatNumberToLocal((item.price * (100 - item.discount)) / 100)}</>
@@ -193,7 +195,9 @@ const CartProduct = (props: TProps) => {
                             VND
                           </Typography>
                         </Box>
-                        <Typography>x <b>{item.amount}</b></Typography>
+                        <Typography
+                          data-testid={`cart-product-quantity-${item.name}`}
+                        >x <b>{item.amount}</b></Typography>
                       </Box>
                     </Box>
                   </StyleMenuItem>

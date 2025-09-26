@@ -1,6 +1,6 @@
-const {CONFIG_MESSAGE_ERRORS} = require("../configs");
+const { CONFIG_MESSAGE_ERRORS } = require("../configs");
 const OrderService = require("../services/OrderService");
-const {validateRequiredInput} = require("../utils");
+const { validateRequiredInput } = require("../utils");
 
 const createOrder = async (req, res) => {
     try {
@@ -23,7 +23,7 @@ const createOrder = async (req, res) => {
             });
         }
         const response = await OrderService.createOrder(req.body);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -53,8 +53,8 @@ const getDetailsOrder = async (req, res) => {
             });
         }
         const response = await OrderService.getOrderDetails(orderId);
-        const {data, status, typeError, message, statusMessage} = response;
-        console.log({data})
+        const { data, status, typeError, message, statusMessage } = response;
+        console.log({ data })
         return res.status(status).json({
             typeError,
             data,
@@ -83,7 +83,7 @@ const deleteOrderProduct = async (req, res) => {
             });
         }
         const response = await OrderService.deleteOrderProduct(orderId);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -112,7 +112,7 @@ const cancelOrderProduct = async (req, res) => {
             });
         }
         const response = await OrderService.cancelOrder(orderId);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -133,7 +133,7 @@ const getAllOrder = async (req, res) => {
     try {
         const params = req.query;
         const response = await OrderService.getAllOrder(params);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -161,7 +161,7 @@ const updateOrder = async (req, res) => {
             });
         }
         const response = await OrderService.updateOrder(orderId, req.body);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -190,7 +190,7 @@ const updateStatusOrder = async (req, res) => {
             });
         }
         const response = await OrderService.updateStatusOrder(orderId, req.body);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -223,7 +223,7 @@ const getAllOrderOfMe = async (req, res) => {
             });
         }
         const response = await OrderService.getAllOrderOfMe(userId, params);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -254,7 +254,7 @@ const getDetailsOrderOfMe = async (req, res) => {
             });
         }
         const response = await OrderService.getDetailsOrderOfMe(userId, orderId);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -285,7 +285,7 @@ const cancelOrderOfMe = async (req, res) => {
             });
         }
         const response = await OrderService.cancelOrderOfMe(userId, orderId);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,
@@ -315,7 +315,7 @@ const cancelOrderByAdmin = async (req, res) => {
             });
         }
         const response = await OrderService.cancelOrderProductByAdmin(orderId);
-        const {data, status, typeError, message, statusMessage} = response;
+        const { data, status, typeError, message, statusMessage } = response;
         return res.status(status).json({
             typeError,
             data,

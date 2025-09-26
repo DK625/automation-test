@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema(
         ref: "City",
         required: true,
       },
-      phone: { type: Number, required: true },
+      phone: { type: String, required: true }, // since phone number container number '0'
     },
     paymentMethod: {
       type: mongoose.Schema.Types.ObjectId,
