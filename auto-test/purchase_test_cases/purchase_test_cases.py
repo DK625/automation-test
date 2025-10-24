@@ -473,7 +473,6 @@ class TestPurchase():
                 """Convert price string to integer"""
                 return int(price_string.replace('VND', '').replace('.', '').strip())
 
-            input_data = self.dataSheet[name_case]
             # Then use it
             product_prices = [
                 get_product_price(item)
@@ -490,7 +489,7 @@ class TestPurchase():
             total_amount_value = get_price_amount(total_amount)
 
             self.wrap_assert(product_prices == self.expectData[name_case][0]['product_prices']["content"],
-                                f"Product prices mismatch. Expected: {input_data['product_prices']}, Got: {product_prices}",
+                                f"Product prices mismatch. Expected: {self.expectData[name_case][0]['product_prices']["content"]}, Got: {product_prices}",
                                 "product_prices_check")
             self.wrap_assert(product_prices_sum + shipping_fee_amount == total_amount_value,
                                 f"Total amount mismatch. Expected: {product_prices_sum + shipping_fee_amount:,} VND, Got: {total_amount_value:,} VND",
@@ -517,7 +516,7 @@ class TestPurchase():
             """)
             log_to_sheet_multi_rows(self.worksheet, name_case, "PASSED ✅", [f"content:{product_prices}"], 1)
         except AssertionError as assert_err: 
-            log_to_sheet(self.worksheet, "Verify Order Total Calculation", "FAILED ❌",  str(assert_err))
+            log_to_sheet(self.worksheet, name_case, "FAILED ❌",  str(assert_err))
 
 
     def test_cart_to_purchase_flow_integration(self):
