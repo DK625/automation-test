@@ -9,7 +9,7 @@ sys.path.append(path)
 
 from gg_sheet.index import ConnectGoogleSheet
 from utils.index import parse_sheet_to_object_cart, log_to_sheet, log_to_sheet_multi_rows
-from constant.index import CART_TEST_NAME, JSON_NAME
+from constant.index import CART_TEST_NAME, JSON_NAME, SPREEDSHEET_ID
 
 from datetime import datetime
 
@@ -38,7 +38,7 @@ class TestCart():
 
         # load data from gg sheet 
         cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
-        cls.worksheet = cls.gg_sheet.loadSheet_WorkSheet("1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY", CART_TEST_NAME)
+        cls.worksheet = cls.gg_sheet.loadSheet_WorkSheet(SPREEDSHEET_ID, CART_TEST_NAME)
         
         # parse object : 
         cls.expectData, cls.dataSheet = parse_sheet_to_object_cart(cls.worksheet)

@@ -9,7 +9,7 @@ sys.path.append(path)
 import json
 from gg_sheet.index import ConnectGoogleSheet
 from utils.index import parse_sheet_to_object_purchase, log_to_sheet, log_to_sheet_multi_rows, log_to_sheet_multi_rows_option
-from constant.index import PURCHASE_TEST_NAME, JSON_NAME
+from constant.index import PURCHASE_TEST_NAME, JSON_NAME, SPREEDSHEET_ID
 
 from datetime import datetime
 
@@ -39,7 +39,7 @@ class TestPurchase():
 
         # load data from gg sheet 
         cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
-        cls.worksheet = cls.gg_sheet.loadSheet_WorkSheet("1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY", PURCHASE_TEST_NAME)
+        cls.worksheet = cls.gg_sheet.loadSheet_WorkSheet(SPREEDSHEET_ID, PURCHASE_TEST_NAME)
         # parse object : 
         cls.expectData, cls.dataSheet = parse_sheet_to_object_purchase(cls.worksheet)
 
