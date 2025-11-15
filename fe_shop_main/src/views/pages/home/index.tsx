@@ -17,6 +17,7 @@ import CardProduct from 'src/views/pages/product/components/CardProduct'
 import FilterProduct from 'src/views/pages/product/components/FilterProduct'
 import InputSearch from 'src/components/input-search'
 import NoData from 'src/components/no-data'
+import CustomBreadcrumb from 'src/components/breadcrumb'
 
 // ** Config
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
@@ -64,7 +65,33 @@ interface TProductPublicState {
 
 const StyledTabs = styled(Tabs)<TabsProps>(({ theme }) => ({
   '&.MuiTabs-root': {
-    borderBottom: 'none'
+    borderBottom: 'none',
+    '& .MuiTab-root': {
+      margin: '0 4px',
+      borderRadius: '8px',
+      transition: 'all 0.3s ease',
+      fontWeight: 500,
+      '&:hover': {
+        backgroundColor: theme.palette.mode === 'light'
+          ? 'rgba(0, 0, 0, 0.04)'
+          : 'rgba(255, 255, 255, 0.08)',
+        transform: 'translateY(-2px)',
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+      },
+      '&.Mui-selected': {
+        backgroundColor: theme.palette.mode === 'light'
+          ? `${theme.palette.primary.main}15`
+          : `${theme.palette.primary.main}25`,
+        color: theme.palette.primary.main,
+        fontWeight: 700,
+        boxShadow: `0 2px 8px ${theme.palette.primary.main}30`
+      }
+    },
+    '& .MuiTabs-indicator': {
+      backgroundColor: theme.palette.primary.main,
+      height: '3px',
+      borderRadius: '3px 3px 0 0'
+    }
   }
 }))
 
@@ -89,6 +116,8 @@ const HomePage: NextPage<TProps> = props => {
       firstRender.current = true
     }
     setProductTypeSelected(newValue)
+    setPage(1) // Reset to page 1 when changing tabs
+    setPageSize(PAGE_SIZE_OPTION[0]) // Reset to default page size (8)
   }
 
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION[0])
@@ -256,6 +285,9 @@ const HomePage: NextPage<TProps> = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessUnLike, isErrorUnLike, messageErrorUnLike, typeError])
 
+  // Get current selected product type name
+  const selectedProductTypeName = optionTypes.find(opt => opt.value === productTypeSelected)?.label || ''
+
   return (
     <>
       {loading && <Spinner />}
@@ -266,6 +298,12 @@ const HomePage: NextPage<TProps> = props => {
           width: '100%'
         }}
       >
+        <CustomBreadcrumb
+          items={[
+            { label: 'Trang chủ', href: '/' },
+            ...(selectedProductTypeName ? [{ label: selectedProductTypeName }] : [])
+          ]}
+        />
         <StyledTabs value={productTypeSelected} onChange={handleChange} aria-label='wrapped label tabs example'>
           {optionTypes.map(opt => {
             return (

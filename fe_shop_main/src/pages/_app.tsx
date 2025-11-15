@@ -121,7 +121,7 @@ export default function App(props: ExtendedAppProps) {
   const title = slugProduct ? `${themeConfig.templateName} - ${slugProduct}`
     : Component.title ?? `${themeConfig.templateName} - Khóa học Nextjs 14 PRO thực chiến`
 
-  const keywords = Component.keywords ?? 'Material Design, MUI, ReactJS, Yup, NextJS 14, Typescript, lập trình thật dễ'
+  const keywords = Component.keywords ?? 'Material Design, MUI, ReactJS, Yup, NextJS 14, Typescript, ElectroStore'
 
   const description = Component.description ?? `${themeConfig.templateName} – Khóa học Nextjs 14 PRO thực chiến với dự án website bán hàng`
   const urlImage = Component.urlImage ?? "/logo.png"
@@ -153,7 +153,7 @@ export default function App(props: ExtendedAppProps) {
         />
         <meta name='keywords' content={keywords} />
         <meta name='viewport' content='initial-scale=1, width=device-width' />
-        <meta name="author" content="Lập trình thật dễ" />
+        <meta name="author" content="ElectroStore" />
         <meta name="name" content="Khóa học NextJS 14 typescript PRO 2024" />
         <meta name="image" content={urlImage} />
         {/* facebook */}

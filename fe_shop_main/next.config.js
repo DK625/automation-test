@@ -9,28 +9,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*lh3.googleusercontent.com",
-        port: "",
-        pathname: "**",
+        hostname: "**",
       },
       {
-        protocol: "https",
-        hostname: "*fakestoreapi.com",
-        port: "",
-        pathname: "**",
-      },
-      {
-        protocol: "https",
-        hostname: "*cdn.dummyjson.com",
-        port: "",
-        pathname: "**",
-      },
-      {
-        protocol: "https",
-        hostname: "*platform-lookaside.fbsbx.com",
-        port: "",
-        pathname: "**",
-      },
+        protocol: "http",
+        hostname: "**",
+      }
     ]
   }
 }
