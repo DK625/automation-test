@@ -103,10 +103,10 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
           variant='h6'
           color='primary'
           noWrap
-          sx={{ flexGrow: 1, fontWeight: '600', cursor: 'pointer' }}
+          sx={{ flexGrow: 1, fontWeight: '600', cursor: 'pointer', fontSize: '1.75rem' }}
         >
           <Link style={{ color: 'inherit' }} href={ROUTE_CONFIG.HOME}>
-            LTTD
+            ElectroStore
           </Link>
         </Typography>
         <LanguageDropdown />

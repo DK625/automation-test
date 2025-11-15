@@ -1,3 +1,15 @@
+import os
+import sys 
+
+base = os.getcwd()     
+         
+path = os.path.dirname(base)
+sys.path.append(path)
+
+from gg_sheet.index import ConnectGoogleSheet
+from utils.index import parseSheetToObjectPurchase
+from constant.index import PURCHASE_TEST_NAME, JSON_NAME
+
 from datetime import datetime
 
 from selenium import webdriver
@@ -6,11 +18,12 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+
 import time
 from pymongo import MongoClient
 import json
 import pytest
-import os
+
 
 
 class TestPurchase():
@@ -22,11 +35,17 @@ class TestPurchase():
         """Chạy một lần khi bắt đầu tất cả test cases"""
         cls.driver = webdriver.Chrome()
         cls.vars = {}
-        cls.input_data = cls.load_json('test_input.json')
+
+        # load data from gg sheet 
+        cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
+        worksheet = cls.gg_sheet.loadSheet_WorkSheet("1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY", PURCHASE_TEST_NAME)
+        # parse object : 
+        cls.dataSheet = parseSheetToObjectPurchase(worksheet.get_all_values())
+
         cls.test_failures_dir = "test_failures"
         os.makedirs(cls.test_failures_dir, exist_ok=True)
         try:
-            cls.mongo_client = MongoClient("mongodb://localhost:27017/")
+            cls.mongo_client = MongoClient("mongodb://localhost:27018/")
             cls.db = cls.mongo_client["test"]
             cls.users_collection = cls.db["users"]
             cls.orders_collection = cls.db["orders"]
@@ -36,8 +55,16 @@ class TestPurchase():
 
     @classmethod
     def load_json(cls, filename):
-        with open(filename, 'r', encoding='utf-8') as f:
-            return json.load(f)
+        if not os.path.exists(filename):
+            print(f"⚠ File {filename} không tồn tại")
+            return None 
+
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except json.JSONDecodeError as e:
+            print(f"⚠ JSON lỗi: {e}")
+            return None
 
     def take_screenshot(self, name):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -53,8 +80,8 @@ class TestPurchase():
             raise e
 
     def login(self):
-        login_input = self.input_data['login']
-        self.driver.get("http://localhost:3000/home")
+        login_input = self.dataSheet['login']
+        self.driver.get("http://14.225.44.169:3000/home")
         self.driver.maximize_window()
 
         # Click vào nút đăng nhập và chờ form login
@@ -67,13 +94,13 @@ class TestPurchase():
         email_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[aria-invalid='false']"))
         )
-        email_input.send_keys(login_input['username'])
+        email_input.send_keys(login_input['username'][0])
 
         # Nhập password - using MUI TextField selector with type='password'
         password_input = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "input.MuiInputBase-input[type='password']"))
         )
-        password_input.send_keys(login_input['password'])
+        password_input.send_keys(login_input['password'][0])
 
         submit_button = WebDriverWait(self.driver, 35).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))
@@ -82,33 +109,34 @@ class TestPurchase():
 
     def test_validate_empty_shipping_address_fields(self):
         self.login()
-        input_data = self.input_data['test_validate_empty_shipping_address']
-
+        input_data = self.dataSheet['test_validate_empty_shipping_address']
+        
         for product in input_data['products']:
             # Click tab
-            tab = WebDriverWait(self.driver, 55).until(
+            tab = WebDriverWait(self.driver, 5).until(
                 EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='tab-{product['tab']}']"))
             )
+            
             tab.click()
             for product_name in product['items']:
-                add_button = WebDriverWait(self.driver, 35).until(
+                add_button = WebDriverWait(self.driver, 5).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='add-to-cart-{product_name}']"))
                 )
                 self.driver.execute_script("arguments[0].click();", add_button)
 
         # Click cart icon
-        cart_icon = WebDriverWait(self.driver, 55).until(
+        cart_icon = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--flowbite > path"))
         )
         cart_icon.click()
         time.sleep(1)
-        quantity_in_cart = int(WebDriverWait(self.driver, 55).until(
+        quantity_in_cart = int(WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBadge-badge"))
         ).text)
-        assert (quantity_in_cart == 5, f"Expected 5 items in cart, got {quantity_in_cart}")
+        assert quantity_in_cart == 5, f"Expected 5 items in cart, got {quantity_in_cart}"
 
         # Go to cart page
-        cart_page_button = WebDriverWait(self.driver, 55).until(
+        cart_page_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-akzecb-MuiButtonBase-root-MuiButton-root"))
         )
         cart_page_button.click()
@@ -116,34 +144,30 @@ class TestPurchase():
         time.sleep(1)
         # Select all products
         # self.driver.find_element(By.CSS_SELECTOR, ".css-tfttuo .PrivateSwitchBase-input").click()
-        select_all = WebDriverWait(self.driver, 55).until(
+        select_all = WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".css-tfttuo .PrivateSwitchBase-input"))
         )
         select_all.click()
 
         # Proceed to checkout
-        checkout_button = WebDriverWait(self.driver, 55).until(
+        checkout_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root"))
         )
         checkout_button.click()
 
         # Change shipping address
-        change_address = WebDriverWait(self.driver, 55).until(
+        change_address = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-text"))
         )
+       
         self.driver.execute_script("arguments[0].click();", change_address)
 
-        WebDriverWait(self.driver, 35).until(
+        WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR,
-                                        ".MuiBox-root:nth-child(1) > .MuiFormControlLabel-root > .MuiTypography-root"))).click()  # choice current address
-        # need click manual if havent click
-        next_change_address = WebDriverWait(self.driver, 55).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-root:nth-child(2)"))
-        )
-        next_change_address.click()
-
+                                        "form>div>div>div>button"))).click()  # choice current address
+       
         # Clear all input fields
-        input_fields = WebDriverWait(self.driver, 55).until(
+        input_fields = WebDriverWait(self.driver, 5).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input.MuiInputBase-input"))
         )
 
@@ -157,13 +181,13 @@ class TestPurchase():
                 field.send_keys("2")
 
         # Click confirm to show validation errors
-        confirm_button = WebDriverWait(self.driver, 55).until(
+        confirm_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root"))
         )
         confirm_button.click()
 
         # Verify error messages
-        error_messages = WebDriverWait(self.driver, 55).until(
+        error_messages = WebDriverWait(self.driver, 5).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiFormHelperText-root.Mui-error"))
         )
 
@@ -177,7 +201,7 @@ class TestPurchase():
             assert expected in actual_errors, f"Expected error message '{expected}' not found"
 
         # Close form
-        close_button = WebDriverWait(self.driver, 55).until(
+        close_button = WebDriverWait(self.driver, 5).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--material-symbols-light > path"))
         )
         close_button.click()
@@ -200,7 +224,7 @@ class TestPurchase():
         - Verifies form input matches displayed information
         - Checks address details inside and outside the form
         """
-        input_data = self.input_data['test_multiple_addresses']
+        input_data = self.dataSheet['test_multiple_addresses']
         change_button = WebDriverWait(self.driver, 55).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiButton-root"))
         )
@@ -248,15 +272,15 @@ class TestPurchase():
                                          ".css-1lfi9f6-MuiButtonBase-root-MuiButton-root").click()  # add new address
         second_address = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][1]"))
+                (By.XPATH, "//input[@value='0']/following::span[contains(@class, 'MuiTypography-body1')][1]"))
         ).text
         third_address = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][2]"))
+                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][1]"))
         ).text
-        fourth_address = WebDriverWait(self.driver, 35).until(
+        fourth_address = WebDriverWait(self.driver, 5).until(
             EC.presence_of_element_located(
-                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][3]"))
+                (By.XPATH, "//input[@value='1']/following::span[contains(@class, 'MuiTypography-body1')][2]"))
         ).text
 
         self.wrap_assert(second_address == input_data['expected_addresses'][0],
@@ -291,13 +315,13 @@ class TestPurchase():
         - Verifies selected address matches display
         - Confirms address details consistency
         """
-        input_data = self.input_data['test_update_delivery_address_and_verify_display']
+        input_data = self.dataSheet['test_update_delivery_address_and_verify_display']
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".MuiBox-root:nth-child(2) > .MuiFormControlLabel-root > .MuiTypography-root").click()  # second choice address
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".css-1uimnmd-MuiButtonBase-root-MuiButton-root").click()  # update address
         # Lấy phần thông tin số điện thoại và tên
-        phone_name = WebDriverWait(self.driver, 35).until(
+        name_phone = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "p.MuiTypography-root.css-1wr5z0g-MuiTypography-root"))
         ).text
 
@@ -306,8 +330,8 @@ class TestPurchase():
             EC.presence_of_element_located((By.CSS_SELECTOR, "span.MuiTypography-root.css-1f0oh43-MuiTypography-root"))
         ).text
 
-        self.wrap_assert(phone_name + ' ' + address == input_data['expect_delivery_address'],
-                         f"Address mismatch. Expected: {input_data['expect_delivery_address']}, Got: '{phone_name + address}'",
+        self.wrap_assert(name_phone + ' ' + address == input_data['expect_delivery_address'],
+                         f"Address mismatch. Expected: {input_data['expect_delivery_address']}, Got: '{name_phone + address}'",
                          "delivery_address_check")
 
         print(f"""
@@ -316,7 +340,7 @@ class TestPurchase():
            Results:
            ✓ Successfully selected new delivery address
            ✓ Address Details:
-               - Contact: {phone_name}
+               - Contact: {name_phone}
                - Address: {address}
            ✓ Address information matches expected values
 
@@ -330,7 +354,7 @@ class TestPurchase():
         - GHTK: Fixed 1,000 VND
         - Verifies fee display and total calculation
         """
-        input_data = self.input_data['test_shipping_fee']
+        input_data = self.dataSheet['test_shipping_fee']
         self.driver.find_element(By.CSS_SELECTOR,
                                  ".MuiFormControlLabel-root:nth-child(2) .PrivateSwitchBase-input").click()  # change shoppe method
         shoppe_shipping_fee = WebDriverWait(self.driver, 35).until(
@@ -380,7 +404,7 @@ class TestPurchase():
             """Convert price string to integer"""
             return int(price_string.replace('VND', '').replace('.', '').strip())
 
-        input_data = self.input_data['test_price_calculation']
+        input_data = self.dataSheet['test_price_calculation']
         # Then use it
         product_prices = [
             get_product_price(item)
@@ -395,6 +419,8 @@ class TestPurchase():
         product_prices_sum = sum(get_price_amount(price) for price in product_prices)
         shipping_fee_amount = get_price_amount(shipping_fee)
         total_amount_value = get_price_amount(total_amount)
+        print("Product price : ", product_prices)
+        print("product price input : ", input_data['product_prices'])
         self.wrap_assert(product_prices == input_data['product_prices'],
                          f"Product prices mismatch. Expected: {input_data['product_prices']}, Got: {product_prices}",
                          "product_prices_check")
@@ -472,7 +498,7 @@ class TestPurchase():
         product_details = get_product_details()
 
         # Lấy phần thông tin số điện thoại và tên
-        phone_name = WebDriverWait(self.driver, 35).until(
+        name_phone = WebDriverWait(self.driver, 35).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, "p.MuiTypography-root.css-1wr5z0g-MuiTypography-root"))
         ).text
 
@@ -581,6 +607,7 @@ class TestPurchase():
                     (By.CSS_SELECTOR, ".css-0 .MuiBox-root.css-1h7ftw7:nth-child(3) p.css-aofu14-MuiTypography-root"))
             ).text
 
+
             order_summary = {
                 "delivery_address": delivery_address,
                 "phone": phone,
@@ -594,18 +621,20 @@ class TestPurchase():
 
         order_summary = get_order_summary()
         # assert product_details == order_details, 'Product details and order detail mismatch'
+        
         self.wrap_assert(address == order_summary['delivery_address'],
                          'Delivery address mismatch',
                          'delivery_address_match')
+
 
         self.wrap_assert(product_prices == order_prices,
                          'Price summary mismatch',
                          'price_summary_match')
 
-        # self.wrap_assert(phone_name == '0' + order_summary['phone'] + ' ' + order_summary['order_name'],
+        # self.wrap_assert(name_phone == '0' + order_summary['phone'] + ' ' + order_summary['order_name'],
         #                  'Phone number and name mismatch',
         #                  'contact_info_match')
-        self.wrap_assert(phone_name == order_summary['phone'] + ' ' + order_summary['order_name'],
+        self.wrap_assert(name_phone == order_summary['order_name'] + ' ' + order_summary['phone'],
                          'Phone number and name mismatch',
                          'contact_info_match')
         print(f"""
@@ -655,6 +684,26 @@ class TestPurchase():
 
                        Status: PASSED ✅
                        """)
+    
+    def test_teardown_class(self):
+        test_addresses = [
+                {
+                    "firstName": address["name"].split(" ")[1],
+                    "lastName": address["name"].split(" ")[0],
+                    "address": address["address"],
+                    "phoneNumber": address["phone"]
+                } for address in self.dataSheet["test_multiple_addresses"]["addresses"]
+                
+            ]
+        
+        self.verify_database_state(PURCHASE_TEST_NAME, test_addresses)
+        self.rollback_database_changes(PURCHASE_TEST_NAME, test_addresses)
+        
+        
+
+        """Chỉ chạy sau khi tất cả test cases hoàn thành"""
+        if hasattr(self, 'driver'):  # Kiểm tra xem driver có tồn tại không
+            self.driver.quit()
 
     def verify_database_state(self, test_name, expected_state):
         """
@@ -666,7 +715,7 @@ class TestPurchase():
         """
         try:
             # Find user
-            user = self.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
+            user = self.users_collection.find_one({"email": self.dataSheet["login"]["username"][0]})
             if not user:
                 raise AssertionError(f"{test_name}: User not found in database")
 
@@ -731,17 +780,20 @@ class TestPurchase():
         except Exception as e:
             self.take_screenshot("db_verification_error")
             raise AssertionError(f"{test_name}: Database verification failed - {str(e)}")
+        
 
-    def rollback_database_changes(self, test_name):
+    def rollback_database_changes(self, test_name, test_addresses):
         """
         Rolls back database changes made during test execution
 
         Args:
             test_name (str): Name of the test being rolled back
         """
+       
+
         try:
             # Find user
-            user = self.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
+            user = self.users_collection.find_one({"email": self.dataSheet["login"]["username"][0]})
             if not user:
                 print(f"{test_name}: No user found to rollback")
                 return
@@ -750,109 +802,41 @@ class TestPurchase():
             latest_order = self.orders_collection.find_one(
                 {"user": user['_id']},
                 sort=[("createdAt", -1)]
-            )
+            ) # get latest order and delete 
 
             if latest_order:
                 self.orders_collection.delete_one({"_id": latest_order["_id"]})
                 print(f"{test_name}: Rolled back latest order")
 
             # Rollback addresses
-            test_addresses = [
-                {
-                    "firstName": "Doe",
-                    "lastName": "John",
-                    "address": "123 Test Street",
-                    "phoneNumber": "0971234567"
-                },
-                {
-                    "firstName": "Doee",
-                    "lastName": "John",
-                    "address": "123 Test Street",
-                    "phoneNumber": "0971234567"
-                },
-                {
-                    "firstName": "ererDoe",
-                    "lastName": "John",
-                    "address": "123 Test Street",
-                    "phoneNumber": "0971234567"
-                }
-            ]
+            
 
-            update_result = self.users_collection.update_one(
-                {"_id": user['_id']},
-                {"$pull": {"addresses": {"$in": test_addresses}}}
-            )
+            # update_result = self.users_collection.update_one(
+            #     {"_id": user['_id']},
+            #     {"$pull": {"addresses": {"$in": test_addresses}}}
+            # ) # delete user have addresss in test_addresses 
+
+            for addr in test_addresses:
+                self.users_collection.update_one(
+                    {"_id": user["_id"]},
+                    {"$pull": {
+                        "addresses": {
+                            "address": addr["address"],
+                            "firstName": addr["firstName"],
+                            "lastName": addr["lastName"],
+                            "phoneNumber": addr["phoneNumber"]
+                        }
+                    }}
+                )
+
 
             print(f"{test_name}: Rolled back {update_result.modified_count} test addresses")
 
         except Exception as e:
             print(f"{test_name}: Rollback failed - {str(e)}")
-
-    @classmethod
-    def teardown_class(cls):
-        try:
-            if cls.users_collection is not None:
-                # Print before removal
-                time.sleep(3)
-                found_user = cls.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
-                print("\nCurrent addresses in DB:", found_user.get('addresses'))
-
-                user_id = found_user['_id']
-                latest_order = cls.orders_collection.find_one(
-                    {"user": user_id},
-                    sort=[("createdAt", -1)]
-                )
-
-                if latest_order:
-                    # Remove the latest order
-                    result = cls.orders_collection.delete_one({"_id": latest_order["_id"]})
-                    if result.deleted_count > 0:
-                        print(f"Rollback the most recent order for user {user_id}")
-                    else:
-                        print(f"Failed to delete the most recent order for user {user_id}")
-                else:
-                    print(f"No orders found for user {user_id}")
-
-                result = cls.users_collection.update_one(
-                    {"email": "doanthuyduong2103@gmail.com"},
-                    {
-                        "$pull": {
-                            "addresses": {
-                                "$or": [
-                                    {
-                                        "firstName": "Doe",  # Changed from John
-                                        "lastName": "John",  # Changed from Doe
-                                        "address": "123 Test Street",
-                                        "phoneNumber": "0971234567"
-                                    },
-                                    {
-                                        "firstName": "Doee",  # Changed from John
-                                        "lastName": "John",  # Changed from Doee
-                                        "address": "123 Test Street",
-                                        "phoneNumber": "0971234567"
-                                    },
-                                    {
-                                        "firstName": "ererDoe",  # Changed from John
-                                        "lastName": "John",  # Changed from ererDoe
-                                        "address": "123 Test Street",
-                                        "phoneNumber": "0971234567"
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                )
-
-                # Print after removal to verify
-                found_user_after = cls.users_collection.find_one({"email": "doanthuyduong2103@gmail.com"})
-                print("Addresses after rollback:", found_user_after.get('addresses'))
-        except Exception as e:
-            print(f"MongoDB cleanup error: {str(e)}")
         finally:
-            if cls.mongo_client:
-                cls.mongo_client.close()
+            if self.mongo_client:
+                self.mongo_client.close()
                 print("MongoDB connection closed")
 
-        """Chỉ chạy sau khi tất cả test cases hoàn thành"""
-        if hasattr(cls, 'driver'):  # Kiểm tra xem driver có tồn tại không
-            cls.driver.quit()
+   

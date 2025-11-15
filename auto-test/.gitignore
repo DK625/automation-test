@@ -1,2 +1,4 @@
 venv
 __pycache__
+cart_test_cases/test_failures/
+purchase_test_cases/test_failures/

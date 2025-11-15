@@ -20,6 +20,7 @@ import CustomCarousel from 'src/components/custom-carousel'
 import CommentInput from 'src/views/pages/product/components/CommentInput'
 import CommentItem from 'src/views/pages/product/components/CommentItem'
 import CardReview from 'src/views/pages/product/components/CardReview'
+import CustomBreadcrumb from 'src/components/breadcrumb'
 
 // ** Translate
 import { t } from 'i18next'
@@ -457,8 +458,15 @@ const DetailsProductPage: NextPage<TProps> = ({ productData, productsRelated }) 
       <Grid container>
         <Box
           marginTop={{ md: 5, xs: 4 }}
+          sx={{ width: '100%' }}
         >
-          <Typography sx={{ color: theme.palette.primary.main, fontWeight: "600", marginBottom: "8px" }}>{t("Product_details")}{" / "}{dataProduct.type?.name}{" "}/{" "}{dataProduct?.name}</Typography>
+          <CustomBreadcrumb
+            items={[
+              { label: 'Trang chủ', href: '/' },
+              ...(dataProduct.type?.name ? [{ label: dataProduct.type?.name, href: '/' }] : []),
+              { label: dataProduct?.name || t('Product_details') }
+            ]}
+          />
         </Box>
         <Grid
           container

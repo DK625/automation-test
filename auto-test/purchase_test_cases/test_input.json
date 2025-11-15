@@ -1,27 +1,31 @@
 {
  "login": {
-   "username": "doanthuyduong2103@gmail.com",
-   "password": "Thanhthuy2103@"
+   "username": ["lovecatdat@gmail.com"],
+   "password": ["123456@Dat"]
  },
  "test_validate_empty_shipping_address": {
-   "products": [
+  "products": [
      {
-       "tab": "Đồng hồ",
+       "tab": "Làm Đẹp",
        "items": [
-         "Đồng hồ thông minh Apple Watch Series 9 GPS 41mm viền nhôm dây vải "
+         "Eyeshadow Palette with Mirror"
        ]
      },
      {
-       "tab": "Máy tính bảng",
-       "items": ["Surface Pro 5 Core i5 7300U /12.3 inch QHD ( Model 2017)"]
+       "tab": "Đồ Dùng Gia Đình",
+       "items": ["Điều hòa"]
      },
      {
-       "tab": "Laptop",
-       "items": ["Laptop Acer Gaming Nitro 5 AN515 57 53F9 i5 11400H/8GB/512GB/4GB RTX3050/144Hz/Win11"]
+       "tab": "Đồ Điện Tử",
+       "items": ["WD 2TB Elements Portable External Hard Drive - USB 3.0"]
      },
      {
-       "tab": "Điện thoại",
-       "items": ["Iphone 15 promax", "Samsung Galaxy S23 8GB 128GB"]
+       "tab": "Phụ Kiện",
+       "items": ["Tai nghe Bluetooth"]
+     }, 
+     {
+      "tab" : "Trang Sức", 
+      "items": ["White Gold Plated Princess"]
      }
    ],
    "expected_errors": [
@@ -34,27 +38,27 @@
    "addresses": [
      {
        "name": "John Doe",
-       "address": "123 Test Street",
-       "city_index": 1,
+       "address": "123 Chill Street",
+       "city_index": 0,
        "phone": "0971234567"
      },
      {
-       "name": "John Doee",
+       "name": "John Doe",
        "address": "123 Test Street",
-       "city_index": 1,
+       "city_index": 0,
        "phone": "0971234567"
      },
      {
-       "name": "John ererDoe",
-       "address": "123 Test Street",
-       "city_index": 1,
+       "name": "John Doe",
+       "address": "123 Meo Street",
+       "city_index": 0,
        "phone": "0971234567"
      }
    ],
-   "expected_addresses": [
+    "expected_addresses": [
+     "John Doe 0971234567 123 Chill Street Hà Nội",
      "John Doe 0971234567 123 Test Street Hà Nội",
-     "John Doee 0971234567 123 Test Street Hà Nội",
-     "John ererDoe 0971234567 123 Test Street Hà Nội"
+     "John Doe 0971234567 123 Meo Street Hà Nội"
    ]
  },
  "test_shipping_fee": {
@@ -64,10 +68,10 @@
    }
  },
   "test_update_delivery_address_and_verify_display": {
-    "expect_delivery_address": "0971234567 John Doe 123 Test Street Hà Nội"
+    "expect_delivery_address": "John Doe 0971234567 123 Test Street Hà Nội"
   },
  "test_price_calculation": {
-   "product_prices" : ["3.790.000 VND", "5.990.000 VND", "16.490.000 VND", "27.290.000 VND",
-                                  "17.490.000 VND"]
+   "product_prices" : ["152.830 VND", "8.550.000 VND", "1.689.000 VND", "801.000 VND",
+                                  "263.000 VND"]
  }
 }
