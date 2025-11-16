@@ -368,20 +368,10 @@ class TestCartWithTemplate:
 
         try:
             # IMPORTANT: Click "Select All" checkbox first
-            # Only selected products are included in total calculation
-            print(f"  → Clicking 'Select All' checkbox to select all products")
-            select_all_checkbox = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='select-all-checkbox']"))
+            checkboxes = WebDriverWait(self.driver, 35).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiBox-root.css-uz5qc span"))
             )
-
-            # Check if already checked
-            is_checked = select_all_checkbox.get_attribute('checked')
-            if not is_checked:
-                self.driver.execute_script("arguments[0].click();", select_all_checkbox)
-                time.sleep(1)
-                print(f"  ✓ All products selected")
-            else:
-                print(f"  ✓ All products already selected")
+            checkboxes.click()  # Click vào tất cả các checkbox
 
             # Find cart total using data-testid
             # Frontend: <Typography data-testid="cart-total">49,940,000 VND</Typography>
@@ -396,6 +386,7 @@ class TestCartWithTemplate:
             # Extract number from text like "49,940,000 VND"
             # Remove "VND", commas, dots, spaces
             number_str = total_text.replace('VND', '').replace(',', '').replace('.', '').strip()
+            checkboxes.click()  # Click vào tất cả các checkbox
 
             try:
                 actual_total = int(number_str)

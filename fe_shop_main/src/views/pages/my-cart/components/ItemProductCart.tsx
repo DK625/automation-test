@@ -270,7 +270,10 @@ const ItemProductCart = ({ item, index, selectedRows, handleChangeCheckbox }: TP
           </IconButton>
         </Box>
         <Box sx={{ flexBasis: '5%', mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
-          <IconButton onClick={() => handleDeleteProductCart(itemState.product)}>
+          <IconButton
+            data-testid={`delete-product-${item.name}`}
+            onClick={() => handleDeleteProductCart(itemState.product)}
+          >
             <Icon icon='mdi:delete-outline' />
           </IconButton>
         </Box>
