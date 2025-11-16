@@ -1,14 +1,14 @@
 STT,Input,Output,Expected Result,Result,Phân loại chức năng,Mức độ,Status,Round
 1,"login: username=lovecatdat@gmail.com, password=123456@Dat",,Login successful and redirected to home page,,Authentication,High,,1
-2,"search: product=iPhone 15 Pro Max 256GB, expected_result=found",,Product appears in search results,,Search,High,,1
-3,"search: product=Samsung Galaxy S24 Ultra, expected_result=found",,Product appears in search results,,Search,High,,1
-4,"search: product=MacBook Pro 16"" M3 Max, expected_result=found",,Product appears in search results,,Search,High,,1
-5,"add_to_cart: product=iPhone 15 Pro Max 256GB, quantity=1",,Cart icon shows 1 item and product appears in cart,,Cart Management,High,,1
-6,"add_to_cart: product=Samsung Galaxy S24 Ultra, quantity=1",,Cart icon shows 2 items and product appears in cart,,Cart Management,High,,1
-7,"increase_quantity: product=iPhone 15 Pro Max 256GB, times=2",,Quantity changes from 1 to 3,,Cart Management,Medium,,1
-8,"decrease_quantity: product=iPhone 15 Pro Max 256GB, times=1",,Quantity changes from 3 to 2,,Cart Management,Medium,,1
-9,verify_cart_total: expected_total=99960000,,Total amount matches sum of products (iPhone x2: 69980000 + Samsung x1: 29990000),,Calculation,High,,1
-10,delete_product: product=Samsung Galaxy S24 Ultra,,Product removed from cart and cart count decreased by 1,,Cart Management,High,,1
-11,"add_to_cart: product=MacBook Pro 16"" M3 Max, quantity=2",,Cart icon shows correct count and products in cart,,Cart Management,High,,1
-12,"increase_quantity: product=MacBook Pro 16"" M3 Max, times=5",,Quantity increased correctly (from 2 to 7),,Cart Management,Low,,1
-13,"decrease_quantity: product=MacBook Pro 16"" M3 Max, times=3",,Quantity decreased correctly (from 7 to 4),,Cart Management,Low,,1
+2,"add_to_cart: product=Acer Aspire 5, quantity=1, tab=Laptop",,Click Laptop tab → Search product → Add to cart (cart count: 1),,Cart Management,High,,1
+3,"add_to_cart: product=Realme 11 Pro+, quantity=1, tab=Điện thoại",,Click Điện thoại tab → Search product → Add to cart (cart count: 2),,Cart Management,High,,1
+4,"add_to_cart: product=Soundcore Space Q45, quantity=1, tab=Tai nghe",,Click Tai nghe tab → Search product → Add to cart (cart count: 3),,Cart Management,High,,1
+5,"add_to_cart: product=Samsung T7 Shield 1TB, quantity=1, tab=Phụ kiện",,Click Phụ kiện tab → Search product → Add to cart (cart count: 4),,Cart Management,High,,1
+6,"add_to_cart: product=Imou Ranger 2C, quantity=1, tab=Thiết bị nhà thông minh",,Click Thiết bị nhà thông minh tab → Search product → Add to cart (cart count: 5),,Cart Management,High,,1
+7,"increase_quantity: product=Acer Aspire 5, times=2",,Quantity increased from 1 to 3 (Total updates: +30980000 VND),,Cart Management,Medium,,1
+8,"decrease_quantity: product=Acer Aspire 5, times=1",,Quantity decreased from 3 to 2 (Total updates: -15490000 VND),,Cart Management,Medium,,1
+9,verify_cart_total: expected_total=49940000,,Total verified: 49940000 VND (Acer x2: 30980000 + Realme: 11990000 + Soundcore: 2990000 + Samsung: 3290000 + Imou: 690000),,Calculation,High,,1
+10,delete_product: product=Soundcore Space Q45,,Product removed from cart (Total: 46950000 VND),,Cart Management,High,,1
+11,"add_to_cart: product=HP Pavilion 15, quantity=1, tab=Laptop",,Click Laptop tab → Search → Add to cart,,Cart Management,Medium,,1
+12,"increase_quantity: product=HP Pavilion 15, times=2",,Quantity increased from 1 to 3 (Total: +33980000 VND),,Cart Management,Low,,1
+13,"decrease_quantity: product=HP Pavilion 15, times=1",,Quantity decreased from 3 to 2 (Total: -16990000 VND),,Cart Management,Low,,1

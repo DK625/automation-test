@@ -243,10 +243,23 @@ class TestCartWithTemplate:
         """Execute add to cart action"""
         product_name = params.get('product')
         quantity = int(params.get('quantity', 1))
+        tab = params.get('tab')  # Tab is now REQUIRED
 
-        # SEARCH FOR PRODUCT FIRST
-        # This ensures product is visible on page 1 of results
-        # regardless of original pagination/sorting
+        # STEP 1: Click on product tab FIRST
+        if tab:
+            print(f"  → Clicking tab: {tab}")
+            tab_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='tab-{tab}']"))
+            )
+            tab_button.click()
+            time.sleep(1)
+            print(f"  ✓ Tab '{tab}' selected")
+        else:
+            raise ValueError("Tab parameter is required for add_to_cart action")
+
+        # STEP 2: SEARCH for product WITHIN the tab
+        # This ensures product is visible on page 1 of filtered results
+        print(f"  → Searching for product in '{tab}' tab")
         self.search_product(product_name)
 
         # Get initial cart count
@@ -347,8 +360,60 @@ class TestCartWithTemplate:
 
     def execute_verify_cart_total(self, params):
         """Verify cart total calculation"""
-        # Implementation here
-        return "Cart total verified", "PASS"
+        expected_total = int(params.get('expected_total', 0))
+
+        # Navigate to cart page
+        self.driver.get("http://14.225.44.169:3000/my-cart")
+        time.sleep(2)
+
+        try:
+            # Find the total amount element
+            # Looking for Typography containing "VND" with fontSize 24px and primary color
+            # Based on: <Typography sx={{ fontSize: '24px', fontWeight: 600, color: theme.palette.primary.main }}>
+            #             {formatNumberToLocal(memoTotalSelectedProduct)} VND
+            #           </Typography>
+
+            # Strategy: Find all elements containing "VND", then filter by style
+            total_elements = self.driver.find_elements(By.XPATH, "//p[contains(text(), 'VND')]")
+
+            actual_total = None
+            for element in total_elements:
+                text = element.text.strip()
+                # Check if this is the total (formatted number + VND)
+                if 'VND' in text and element.value_of_css_property('font-size') == '24px':
+                    # Extract number from text like "99,960,000 VND"
+                    number_str = text.replace('VND', '').replace(',', '').replace('.', '').strip()
+                    try:
+                        actual_total = int(number_str)
+                        break
+                    except ValueError:
+                        continue
+
+            if actual_total is None:
+                # Fallback: Try to find by more general pattern
+                total_text_elements = self.driver.find_elements(By.XPATH, "//p[contains(text(), 'VND')]")
+                for elem in total_text_elements:
+                    text = elem.text.strip()
+                    # Look for large numbers
+                    if len(text.replace('VND', '').replace(',', '').replace('.', '').strip()) >= 6:
+                        number_str = text.replace('VND', '').replace(',', '').replace('.', '').strip()
+                        try:
+                            actual_total = int(number_str)
+                            break
+                        except:
+                            continue
+
+            if actual_total is None:
+                return "Could not find total amount on cart page", "FAIL"
+
+            # Compare with expected
+            if actual_total == expected_total:
+                return f"Cart total verified: {actual_total:,} VND (matches expected)", "PASS"
+            else:
+                return f"Cart total mismatch: expected {expected_total:,} VND, got {actual_total:,} VND", "FAIL"
+
+        except Exception as e:
+            return f"Error verifying cart total: {str(e)}", "FAIL"
 
     def execute_delete_product(self, params):
         """Execute delete product action"""
