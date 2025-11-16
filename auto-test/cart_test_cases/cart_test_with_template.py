@@ -184,8 +184,18 @@ class TestCartWithTemplate:
                 EC.presence_of_element_located((By.CSS_SELECTOR, "input[aria-label='search']"))
             )
 
-            # Clear any existing search
+            # Clear any existing search THOROUGHLY
+            # Method 1: Standard clear
             search_input.clear()
+
+            # Method 2: Select all and delete (works better with React controlled inputs)
+            search_input.send_keys(Keys.CONTROL + "a")
+            search_input.send_keys(Keys.BACKSPACE)
+
+            # Method 3: JavaScript clear as final guarantee
+            self.driver.execute_script("arguments[0].value = '';", search_input)
+
+            # Small delay to ensure clear is processed
             time.sleep(0.3)
 
             # Type product name
