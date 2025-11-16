@@ -31,18 +31,20 @@ const registerUser = (newUser) => {
       }
       const hash = bcrypt.hashSync(password, 10);
 
-      // create default role for user 
+      // create default role for user
 
       // check if the role is exists
-      const roleExist = await Role.findOne({ name: 'User' });
-      let role = roleExist ? roleExist._id : await Role.create({ name: "User", permissions: CONFIG_PERMISSIONS.USER });
+      let roleExist = await Role.findOne({ name: 'User' });
+      if (!roleExist) {
+        roleExist = await Role.create({ name: "User", permissions: CONFIG_PERMISSIONS.USER });
+      }
 
       const createdUser = await User.create({
         email,
         password: hash,
         status: 1,
         userType: CONFIG_USER_TYPE.DEFAULT,
-        role: role._id
+        role: roleExist._id
       });
       if (createdUser) {
         resolve({

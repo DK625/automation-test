@@ -74,14 +74,14 @@ export async function getServerSideProps() {
 
         return {
             props: {
-                products: data?.products,
-                totalCount: data?.totalCount,
+                products: data?.products || [],
+                totalCount: data?.totalCount || 0,
                 productTypes: productTypes,
                 params: {
                     limit,
                     page,
                     order,
-                    productType: productTypes?.[0]?.value || null
+                    productType: productTypes?.[0]?.value || ''
                 }
             }
         }
@@ -90,10 +90,12 @@ export async function getServerSideProps() {
             props: {
                 products: [],
                 totalCount: 0,
+                productTypes: [],
                 params: {
                     limit,
                     page,
-                    order
+                    order,
+                    productType: ''
                 }
             }
         }
