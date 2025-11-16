@@ -17,6 +17,7 @@ from datetime import datetime
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
@@ -103,6 +104,9 @@ class TestCartWithTemplate:
             if action == 'login':
                 return self.execute_login(params)
 
+            elif action == 'search':
+                return self.execute_search(params)
+
             elif action == 'add_to_cart':
                 return self.execute_add_to_cart(params)
 
@@ -167,18 +171,73 @@ class TestCartWithTemplate:
         else:
             return f"Login failed, current URL: {current_url}", "FAIL"
 
+    def search_product(self, product_name):
+        """
+        Search for product using search box
+
+        Args:
+            product_name: Name of product to search
+        """
+        try:
+            # Find search input by aria-label
+            search_input = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[aria-label='search']"))
+            )
+
+            # Clear any existing search
+            search_input.clear()
+            time.sleep(0.3)
+
+            # Type product name
+            search_input.send_keys(product_name)
+
+            # Press Enter to search
+            search_input.send_keys(Keys.ENTER)
+
+            # Wait for search results to load
+            time.sleep(2)
+
+            print(f"  ✓ Searched for: '{product_name}'")
+
+        except Exception as e:
+            print(f"  ✗ Search failed: {str(e)}")
+            raise
+
+    def execute_search(self, params):
+        """Execute search action for testing search functionality"""
+        product_name = params.get('product')
+        expected_result = params.get('expected_result', 'found')
+
+        # Perform search
+        self.search_product(product_name)
+
+        # Verify search results
+        try:
+            if expected_result == 'found':
+                # Check if product appears in results
+                product_element = WebDriverWait(self.driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, f"[data-testid='name-{product_name}']"))
+                )
+                return f"Search successful, found '{product_name}' in results", "PASS"
+            elif expected_result == 'not_found':
+                # Check if "No products found" message appears
+                try:
+                    self.driver.find_element(By.CSS_SELECTOR, f"[data-testid='name-{product_name}']")
+                    return f"Product should not be found but was present", "FAIL"
+                except:
+                    return f"Search returned no results as expected", "PASS"
+        except Exception as e:
+            return f"Search verification failed: {str(e)}", "FAIL"
+
     def execute_add_to_cart(self, params):
         """Execute add to cart action"""
         product_name = params.get('product')
         quantity = int(params.get('quantity', 1))
 
-        # Click on product tab if specified
-        if 'tab' in params:
-            tab_button = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='tab-{params['tab']}']"))
-            )
-            tab_button.click()
-            time.sleep(1)
+        # SEARCH FOR PRODUCT FIRST
+        # This ensures product is visible on page 1 of results
+        # regardless of original pagination/sorting
+        self.search_product(product_name)
 
         # Get initial cart count
         try:

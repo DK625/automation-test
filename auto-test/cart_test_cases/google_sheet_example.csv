@@ -1,11 +1,14 @@
 STT,Input,Output,Expected Result,Result,Phân loại chức năng,Mức độ,Status,Round
 1,"login: username=lovecatdat@gmail.com, password=123456@Dat",,Login successful and redirected to home page,,Authentication,High,,1
-2,"add_to_cart: product=iPhone 15 Pro Max 256GB, quantity=1, tab=Điện thoại",,Cart icon shows 1 item and product appears in cart,,Cart Management,High,,1
-3,"add_to_cart: product=Samsung Galaxy S24 Ultra, quantity=1, tab=Điện thoại",,Cart icon shows 2 items and product appears in cart,,Cart Management,High,,1
-4,"increase_quantity: product=iPhone 15 Pro Max 256GB, times=2",,Quantity changes from 1 to 3,,Cart Management,Medium,,1
-5,"decrease_quantity: product=iPhone 15 Pro Max 256GB, times=1",,Quantity changes from 3 to 2,,Cart Management,Medium,,1
-6,verify_cart_total: expected_total=99960000,,Total amount matches sum of products (iPhone x2: 69980000 + Samsung x1: 29990000),,Calculation,High,,1
-7,delete_product: product=Samsung Galaxy S24 Ultra,,Product removed from cart and cart count decreased by 1,,Cart Management,High,,1
-8,"add_to_cart: product=MacBook Pro 16"" M3 Max, quantity=2, tab=Laptop",,Cart icon shows correct count and products in cart,,Cart Management,High,,1
-9,"increase_quantity: product=MacBook Pro 16"" M3 Max, times=5",,Quantity increased correctly (from 2 to 7),,Cart Management,Low,,1
-10,"decrease_quantity: product=MacBook Pro 16"" M3 Max, times=3",,Quantity decreased correctly (from 7 to 4),,Cart Management,Low,,1
+2,"search: product=iPhone 15 Pro Max 256GB, expected_result=found",,Product appears in search results,,Search,High,,1
+3,"search: product=Samsung Galaxy S24 Ultra, expected_result=found",,Product appears in search results,,Search,High,,1
+4,"search: product=MacBook Pro 16"" M3 Max, expected_result=found",,Product appears in search results,,Search,High,,1
+5,"add_to_cart: product=iPhone 15 Pro Max 256GB, quantity=1",,Cart icon shows 1 item and product appears in cart,,Cart Management,High,,1
+6,"add_to_cart: product=Samsung Galaxy S24 Ultra, quantity=1",,Cart icon shows 2 items and product appears in cart,,Cart Management,High,,1
+7,"increase_quantity: product=iPhone 15 Pro Max 256GB, times=2",,Quantity changes from 1 to 3,,Cart Management,Medium,,1
+8,"decrease_quantity: product=iPhone 15 Pro Max 256GB, times=1",,Quantity changes from 3 to 2,,Cart Management,Medium,,1
+9,verify_cart_total: expected_total=99960000,,Total amount matches sum of products (iPhone x2: 69980000 + Samsung x1: 29990000),,Calculation,High,,1
+10,delete_product: product=Samsung Galaxy S24 Ultra,,Product removed from cart and cart count decreased by 1,,Cart Management,High,,1
+11,"add_to_cart: product=MacBook Pro 16"" M3 Max, quantity=2",,Cart icon shows correct count and products in cart,,Cart Management,High,,1
+12,"increase_quantity: product=MacBook Pro 16"" M3 Max, times=5",,Quantity increased correctly (from 2 to 7),,Cart Management,Low,,1
+13,"decrease_quantity: product=MacBook Pro 16"" M3 Max, times=3",,Quantity decreased correctly (from 7 to 4),,Cart Management,Low,,1
