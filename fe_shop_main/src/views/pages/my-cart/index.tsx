@@ -157,6 +157,7 @@ const MyCartPage: NextPage<TProps> = () => {
               <Box sx={{ width: 'calc(10% - 100px)' }}>
                 <Tooltip title={t('Select_all')}>
                   <Checkbox
+                    data-testid="select-all-checkbox"
                     onChange={handleChangeCheckAll}
                     checked={memoListAllProductIds.every(id => selectedRows.includes(id))}
                   />

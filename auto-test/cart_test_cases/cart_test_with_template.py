@@ -367,6 +367,22 @@ class TestCartWithTemplate:
         time.sleep(2)
 
         try:
+            # IMPORTANT: Click "Select All" checkbox first
+            # Only selected products are included in total calculation
+            print(f"  → Clicking 'Select All' checkbox to select all products")
+            select_all_checkbox = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='select-all-checkbox']"))
+            )
+
+            # Check if already checked
+            is_checked = select_all_checkbox.get_attribute('checked')
+            if not is_checked:
+                self.driver.execute_script("arguments[0].click();", select_all_checkbox)
+                time.sleep(1)
+                print(f"  ✓ All products selected")
+            else:
+                print(f"  ✓ All products already selected")
+
             # Find cart total using data-testid
             # Frontend: <Typography data-testid="cart-total">49,940,000 VND</Typography>
             total_element = WebDriverWait(self.driver, 10).until(
