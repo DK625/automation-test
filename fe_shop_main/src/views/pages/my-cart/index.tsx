@@ -199,7 +199,10 @@ const MyCartPage: NextPage<TProps> = () => {
         )}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: '2px' }}>
           <Typography sx={{ fontSize: '24px', fontWeight: 600 }}>{t('Sum_money')}:</Typography>
-          <Typography sx={{ fontSize: '24px', fontWeight: 600, color: theme.palette.primary.main }}>
+          <Typography
+            data-testid="cart-total"
+            sx={{ fontSize: '24px', fontWeight: 600, color: theme.palette.primary.main }}
+          >
             {formatNumberToLocal(memoTotalSelectedProduct)} VND
           </Typography>
         </Box>

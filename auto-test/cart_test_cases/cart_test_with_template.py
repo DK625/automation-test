@@ -367,44 +367,25 @@ class TestCartWithTemplate:
         time.sleep(2)
 
         try:
-            # Find the total amount element
-            # Looking for Typography containing "VND" with fontSize 24px and primary color
-            # Based on: <Typography sx={{ fontSize: '24px', fontWeight: 600, color: theme.palette.primary.main }}>
-            #             {formatNumberToLocal(memoTotalSelectedProduct)} VND
-            #           </Typography>
+            # Find cart total using data-testid
+            # Frontend: <Typography data-testid="cart-total">49,940,000 VND</Typography>
+            total_element = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "[data-testid='cart-total']"))
+            )
 
-            # Strategy: Find all elements containing "VND", then filter by style
-            total_elements = self.driver.find_elements(By.XPATH, "//p[contains(text(), 'VND')]")
+            # Get text: "49,940,000 VND"
+            total_text = total_element.text.strip()
+            print(f"  → Found cart total element: '{total_text}'")
 
-            actual_total = None
-            for element in total_elements:
-                text = element.text.strip()
-                # Check if this is the total (formatted number + VND)
-                if 'VND' in text and element.value_of_css_property('font-size') == '24px':
-                    # Extract number from text like "99,960,000 VND"
-                    number_str = text.replace('VND', '').replace(',', '').replace('.', '').strip()
-                    try:
-                        actual_total = int(number_str)
-                        break
-                    except ValueError:
-                        continue
+            # Extract number from text like "49,940,000 VND"
+            # Remove "VND", commas, dots, spaces
+            number_str = total_text.replace('VND', '').replace(',', '').replace('.', '').strip()
 
-            if actual_total is None:
-                # Fallback: Try to find by more general pattern
-                total_text_elements = self.driver.find_elements(By.XPATH, "//p[contains(text(), 'VND')]")
-                for elem in total_text_elements:
-                    text = elem.text.strip()
-                    # Look for large numbers
-                    if len(text.replace('VND', '').replace(',', '').replace('.', '').strip()) >= 6:
-                        number_str = text.replace('VND', '').replace(',', '').replace('.', '').strip()
-                        try:
-                            actual_total = int(number_str)
-                            break
-                        except:
-                            continue
-
-            if actual_total is None:
-                return "Could not find total amount on cart page", "FAIL"
+            try:
+                actual_total = int(number_str)
+                print(f"  → Parsed amount: {actual_total:,} VND")
+            except ValueError as e:
+                return f"Could not parse total amount from '{total_text}': {str(e)}", "FAIL"
 
             # Compare with expected
             if actual_total == expected_total:
@@ -413,6 +394,7 @@ class TestCartWithTemplate:
                 return f"Cart total mismatch: expected {expected_total:,} VND, got {actual_total:,} VND", "FAIL"
 
         except Exception as e:
+            self.take_screenshot("verify_cart_total_failed")
             return f"Error verifying cart total: {str(e)}", "FAIL"
 
     def execute_delete_product(self, params):
