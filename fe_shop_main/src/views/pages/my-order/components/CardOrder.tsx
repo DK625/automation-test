@@ -149,7 +149,7 @@ const CardOrder: NextPage<TProps> = props => {
   }
 
   const memeDisabledBuyAgain = useMemo(() => {
-    return dataOrder?.orderItems?.some((item) => !item.product.countInStock)
+    return dataOrder?.orderItems?.some((item) => !item.product || !item.product.countInStock)
   }, [dataOrder.orderItems])
 
   return (
