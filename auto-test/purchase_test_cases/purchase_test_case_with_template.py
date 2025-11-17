@@ -369,11 +369,14 @@ class TestPurchaseWithTemplate:
 
             # Check for validation errors
             print("  → Checking for validation errors")
+            # Note: City dropdown error doesn't have .Mui-error class, so we select all FormHelperText
             error_messages = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiFormHelperText-root.Mui-error"))
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiFormHelperText-root"))
             )
 
-            actual_errors = [message.text for message in error_messages if message.is_displayed()]
+            # Filter only error messages (has text and is displayed)
+            actual_errors = [message.text for message in error_messages
+                           if message.is_displayed() and message.text.strip()]
 
             if len(actual_errors) >= 4:  # All 4 required fields should show errors
                 print(f"  ✓ Found {len(actual_errors)} validation errors:")
