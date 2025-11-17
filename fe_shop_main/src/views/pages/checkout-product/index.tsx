@@ -552,7 +552,7 @@ const CheckoutProductPage: NextPage<TProps> = () => {
                                     <FormControlLabel
                                         key={delivery.value}
                                         value={delivery.value}
-                                        control={<Radio checked={deliverySelected === delivery.value} />}
+                                        control={<Radio checked={deliverySelected === delivery.value} data-testid={`shipping-${delivery.label}`} />}
                                         label={delivery.label}
                                     />
                                 )

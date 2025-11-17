@@ -563,37 +563,33 @@ class TestPurchaseWithTemplate:
         Select shipping provider
 
         Flow:
-        1. Click on radio button for shipping provider
+        1. Click on radio button for shipping provider (using data-testid)
         2. Verify shipping fee is displayed
 
         Params:
         - provider: Shipping provider name (e.g., "GHN", "GHTK")
 
         Note: In the database, only GHN and GHTK are available
-        - GHTK = first option (default)
-        - GHN = second option (name="radio-delivery-group")
+        Frontend renders: data-testid="shipping-{provider_name}"
+        - GHTK: data-testid="shipping-GHTK"
+        - GHN: data-testid="shipping-GHN"
         """
         provider = params.get('provider', '').upper()
 
         try:
             print(f"  → Selecting shipping provider: {provider}")
 
-            # Map provider to selector
-            if provider == "GHN":
-                # Click GHN radio button (second option)
+            # Use data-testid for precise selection
+            if provider in ["GHN", "GHTK"]:
+                # Click shipping radio button using data-testid
                 shipping_radio = WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable((By.NAME, "radio-delivery-group"))
-                )
-            elif provider == "GHTK":
-                # Click GHTK radio button (first option, default)
-                shipping_radio = WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiFormControlLabel-root:nth-child(1) .PrivateSwitchBase-input"))
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, f"[data-testid='shipping-{provider}']"))
                 )
             else:
-                # Default: select first option (GHTK)
+                # Default: select GHTK
                 print(f"  ⚠ Unknown provider '{provider}', defaulting to GHTK")
                 shipping_radio = WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiFormControlLabel-root:nth-child(1) .PrivateSwitchBase-input"))
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='shipping-GHTK']"))
                 )
 
             shipping_radio.click()
