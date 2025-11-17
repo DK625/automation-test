@@ -220,9 +220,15 @@ class TestPurchaseWithTemplate:
         if not products_str:
             return "No products specified", "FAIL"
 
-        # Parse products: "[iPhone 15|Điện thoại; Samsung|Điện thoại]"
-        products_str = products_str.strip('[]')
+        # Handle if parser converted it to a list (bracket-enclosed values)
+        if isinstance(products_str, list):
+            products_str = products_str[0] if products_str else ''
 
+        if not products_str:
+            return "No products specified", "FAIL"
+
+        # Parse products: "iPhone 15|Điện thoại; Samsung|Điện thoại"
+        # No need to strip brackets since parser already removed them
         product_list = []
         for item in products_str.split(';'):
             item = item.strip()
