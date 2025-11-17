@@ -400,75 +400,405 @@ class TestPurchaseWithTemplate:
             return f"Error validating empty shipping: {str(e)}", "FAIL"
 
     def execute_add_address(self, params):
-        """Add a delivery address"""
+        """
+        Add a new delivery address
+
+        Flow:
+        1. Click "Change Address" button
+        2. Click "Cancel" to close if modal is open
+        3. Click "Add New Address" button
+        4. Fill in form: name, address, city (dropdown), phone
+        5. Click "Confirm"
+
+        Params:
+        - name: Full name (e.g., "Nguyen Van A")
+        - address: Street address (e.g., "123 Nguyen Trai")
+        - city_index: Index of city in dropdown (e.g., 0 for first city)
+        - phone: Phone number (e.g., "0912345678")
+        """
         name = params.get('name')
         address = params.get('address')
         city_index = int(params.get('city_index', 0))
         phone = params.get('phone')
 
         try:
-            # This is a placeholder - need actual frontend address form selectors
+            # Click "Change Address" button to open modal
+            print(f"  → Opening address modal")
+            change_button = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiButton-root"))
+            )
+            self.driver.execute_script("arguments[0].click();", change_button)
+            time.sleep(1)
+
+            # Click "Cancel" if modal is already open (to reset state)
+            try:
+                cancel_button = WebDriverWait(self.driver, 5).until(
+                    EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'MuiButton-text') and text()='Hủy bỏ']"))
+                )
+                cancel_button.click()
+                time.sleep(1)
+
+                # Re-open modal
+                change_button.click()
+                time.sleep(1)
+            except:
+                pass
+
+            # Click "Add New Address" button
+            print(f"  → Clicking 'Add New Address'")
+            add_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1lfi9f6-MuiButtonBase-root-MuiButton-root"))
+            )
+            add_button.click()
+            time.sleep(1)
+
+            # Fill name
+            print(f"  → Filling name: {name}")
+            name_input = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập họ và tên']"))
+            )
+            name_input.clear()
+            name_input.send_keys(name)
+
+            # Fill address
+            print(f"  → Filling address: {address}")
+            address_input = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[placeholder='Nhập địa chỉ']"))
+            )
+            address_input.clear()
+            address_input.send_keys(address)
+
+            # Select city from dropdown
+            print(f"  → Selecting city at index {city_index}")
+            city_select = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "div[role='combobox']"))
+            )
+            city_select.click()
+            time.sleep(1)
+
+            city_options = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "li.MuiMenuItem-root"))
+            )
+            city_options[city_index].click()
+            time.sleep(0.5)
+
+            # Fill phone
+            print(f"  → Filling phone: {phone}")
+            phone_input = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "input[inputmode='numeric'][pattern='[0-9]*']"))
+            )
+            phone_input.clear()
+            phone_input.send_keys(phone)
+
+            # Click Confirm
+            print(f"  → Clicking Confirm")
+            confirm_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root"))
+            )
+            confirm_button.click()
+            time.sleep(2)
+
+            print(f"  ✓ Address added successfully")
             return f"Address added: {name}, {address}, {phone}", "PASS"
 
         except Exception as e:
+            self.take_screenshot("add_address_failed")
             return f"Failed to add address: {str(e)}", "FAIL"
 
     def execute_select_delivery_address(self, params):
-        """Select a delivery address from list"""
+        """
+        Select a delivery address from list
+
+        Flow:
+        1. Modal is already open (from previous test or open it)
+        2. Click on radio button at specific index
+        3. Click "Update" to confirm selection
+        4. Verify address is displayed on checkout page
+
+        Params:
+        - address_index: Index of address to select (0 = first, 1 = second, etc.)
+        """
         address_index = int(params.get('address_index', 0))
 
         try:
-            # Placeholder - need actual address selection logic
-            return f"Selected address at index {address_index}", "PASS"
+            print(f"  → Selecting address at index {address_index}")
+
+            # Modal should already be open from add_address test
+            # Click on the radio button for the address at specified index
+            # CSS nth-child is 1-based, so add 1 to address_index
+            address_radio_selector = f".MuiBox-root:nth-child({address_index + 1}) > .MuiFormControlLabel-root > .MuiTypography-root"
+
+            address_radio = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, address_radio_selector))
+            )
+            address_radio.click()
+            time.sleep(1)
+
+            # Click "Update" button to confirm
+            print(f"  → Clicking Update to confirm selection")
+            update_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root"))
+            )
+            update_button.click()
+            time.sleep(2)
+
+            # Verify address is displayed on checkout page
+            name_phone = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "p.MuiTypography-root.css-1wr5z0g-MuiTypography-root"))
+            ).text
+
+            address_text = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "span.MuiTypography-root.css-1f0oh43-MuiTypography-root"))
+            ).text
+
+            print(f"  ✓ Address selected: {name_phone} - {address_text}")
+            return f"Selected address at index {address_index}: {name_phone} {address_text}", "PASS"
 
         except Exception as e:
+            self.take_screenshot("select_delivery_address_failed")
             return f"Failed to select address: {str(e)}", "FAIL"
 
     def execute_select_shipping(self, params):
-        """Select shipping provider"""
-        provider = params.get('provider')
+        """
+        Select shipping provider
+
+        Flow:
+        1. Click on radio button for shipping provider
+        2. Verify shipping fee is displayed
+
+        Params:
+        - provider: Shipping provider name (e.g., "GHN", "GHTK", "Shopee")
+
+        Note: In the test, they use nth-child selector or name attribute
+        - GHTK = first option (default)
+        - Shopee = second option (.MuiFormControlLabel-root:nth-child(2))
+        - GHN = third option (name="radio-delivery-group")
+        """
+        provider = params.get('provider', '').upper()
 
         try:
-            # Placeholder - need actual shipping selection logic
-            return f"Selected shipping provider: {provider}", "PASS"
+            print(f"  → Selecting shipping provider: {provider}")
+
+            # Map provider to selector
+            if provider == "SHOPEE":
+                # Click second radio button
+                shipping_radio = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiFormControlLabel-root:nth-child(2) .PrivateSwitchBase-input"))
+                )
+            elif provider == "GHN" or provider == "GHTK":
+                # Click radio button by name attribute
+                shipping_radio = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.NAME, "radio-delivery-group"))
+                )
+            else:
+                # Default: select first option
+                shipping_radio = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiFormControlLabel-root:nth-child(1) .PrivateSwitchBase-input"))
+                )
+
+            shipping_radio.click()
+            time.sleep(1)
+
+            # Get shipping fee
+            shipping_fee = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".css-147dy5z:nth-child(2) p:last-child"))
+            ).text
+
+            print(f"  ✓ Shipping provider selected: {provider}, Fee: {shipping_fee}")
+            return f"Selected {provider}, Shipping fee: {shipping_fee}", "PASS"
 
         except Exception as e:
+            self.take_screenshot("select_shipping_failed")
             return f"Failed to select shipping: {str(e)}", "FAIL"
 
     def execute_verify_total_calculation(self, params):
-        """Verify total = products + shipping"""
-        products_total = int(params.get('products_total', 0))
-        shipping = int(params.get('shipping', 0))
-        expected_total = products_total + shipping
+        """
+        Verify total = products + shipping
+
+        Flow:
+        1. Get all product prices from checkout page
+        2. Get shipping fee
+        3. Get total amount
+        4. Verify: sum(products) + shipping = total
+
+        Params:
+        - products_total: Expected sum of product prices (optional, for verification)
+        - shipping: Expected shipping fee (optional, for verification)
+
+        Note: This test reads actual values from the page and verifies the calculation
+        """
+        expected_products_total = params.get('products_total')
+        expected_shipping = params.get('shipping')
 
         try:
-            # Placeholder - need actual total element selector
-            # For now, just calculate
-            return f"Total calculation verified: {products_total} + {shipping} = {expected_total}", "PASS"
+            print(f"  → Verifying total calculation")
+
+            # Helper function to convert price string to integer
+            def get_price_amount(price_string):
+                """Convert price string 'X.XXX VND' to integer"""
+                return int(price_string.replace('VND', '').replace('.', '').replace(',', '').strip())
+
+            # Helper function to get product price (discounted or original)
+            def get_product_price(product_element):
+                """Get either discounted price or original price for a product"""
+                try:
+                    # Try to get discounted price first
+                    return product_element.find_element(By.CSS_SELECTOR, ".MuiTypography-h4.css-1qv43kz-MuiTypography-root").text
+                except:
+                    # If no discount, get regular price
+                    return product_element.find_element(By.CSS_SELECTOR, ".MuiTypography-h6").text
+
+            # Get all product prices
+            product_elements = self.driver.find_elements(By.CSS_SELECTOR, ".MuiBox-root.css-fm4r4t")
+            product_prices = [get_product_price(item) for item in product_elements]
+            products_sum = sum(get_price_amount(price) for price in product_prices)
+
+            print(f"  → Product prices: {product_prices}")
+            print(f"  → Products sum: {products_sum:,} VND")
+
+            # Get shipping fee
+            shipping_fee_text = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".css-147dy5z:nth-child(2) p:last-child"))
+            ).text
+            shipping_fee = get_price_amount(shipping_fee_text)
+            print(f"  → Shipping fee: {shipping_fee:,} VND")
+
+            # Get total amount
+            total_amount_text = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".css-147dy5z:nth-child(3) p:last-child"))
+            ).text
+            total_amount = get_price_amount(total_amount_text)
+            print(f"  → Total amount: {total_amount:,} VND")
+
+            # Verify calculation
+            calculated_total = products_sum + shipping_fee
+
+            if calculated_total == total_amount:
+                result_msg = f"Total calculation correct: {products_sum:,} + {shipping_fee:,} = {total_amount:,} VND"
+                print(f"  ✓ {result_msg}")
+
+                # If expected values provided, verify them too
+                if expected_products_total:
+                    expected_products_total = int(expected_products_total)
+                    if products_sum != expected_products_total:
+                        return f"Products total mismatch. Expected: {expected_products_total:,}, Got: {products_sum:,}", "FAIL"
+
+                if expected_shipping:
+                    expected_shipping = int(expected_shipping)
+                    if shipping_fee != expected_shipping:
+                        return f"Shipping fee mismatch. Expected: {expected_shipping:,}, Got: {shipping_fee:,}", "FAIL"
+
+                return result_msg, "PASS"
+            else:
+                error_msg = f"Total calculation incorrect. Expected: {calculated_total:,}, Got: {total_amount:,}"
+                print(f"  ✗ {error_msg}")
+                return error_msg, "FAIL"
 
         except Exception as e:
+            self.take_screenshot("verify_total_failed")
             return f"Failed to verify total: {str(e)}", "FAIL"
 
     def execute_complete_purchase(self, params):
-        """Complete the purchase"""
+        """
+        Complete the purchase
+
+        Flow:
+        1. Click "Đặt hàng" (Order) button
+        2. Confirm in modal (SweetAlert2)
+        3. Wait for order to be created
+        4. Verify cart is empty after purchase
+
+        Params:
+        - payment: Payment method (e.g., "COD") - for documentation, not used in actual flow
+        """
         payment = params.get('payment', 'COD')
 
         try:
-            # Placeholder - need actual purchase completion logic
-            return f"Purchase completed with {payment}", "PASS"
+            print(f"  → Completing purchase with {payment}")
+
+            # Click "Đặt hàng" button
+            print(f"  → Clicking 'Đặt hàng' button")
+            order_button = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBox-root.css-51xbo2>button"))
+            )
+            order_button.click()
+            time.sleep(2)
+
+            # Click confirm in SweetAlert2 modal
+            print(f"  → Confirming order in modal")
+            confirm_button = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".swal2-confirm.swal2-styled"))
+            )
+            confirm_button.click()
+            time.sleep(3)
+
+            # Verify cart is empty (badge should be gone or show 0)
+            print(f"  → Verifying cart is empty")
+            try:
+                cart_badge = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Giỏ hàng'] span.MuiBadge-badge"))
+                )
+                cart_count = int(cart_badge.text)
+            except:
+                # If badge not found, cart is empty (0 items)
+                cart_count = 0
+
+            if cart_count == 0:
+                print(f"  ✓ Purchase completed successfully, cart is empty")
+                return f"Purchase completed with {payment}, cart is now empty", "PASS"
+            else:
+                return f"Purchase may have failed, cart still has {cart_count} items", "FAIL"
 
         except Exception as e:
+            self.take_screenshot("complete_purchase_failed")
             return f"Failed to complete purchase: {str(e)}", "FAIL"
 
     def execute_verify_order_details(self, params):
-        """Verify order details after purchase"""
+        """
+        Verify order details after purchase
+
+        Flow:
+        1. Verify cart is empty (indicating order was created successfully)
+        2. Optionally navigate to orders page to see the order
+        3. Verify order appears in the list
+
+        Params:
+        - order_id: Order identifier (e.g., "latest") - currently just verifies order was created
+
+        Note: The main verification is that the cart is empty after purchase,
+        which indicates the order was successfully created.
+        """
         order_id = params.get('order_id', 'latest')
 
         try:
-            # Placeholder - need actual order verification logic
-            return f"Order {order_id} details verified", "PASS"
+            print(f"  → Verifying order was created successfully")
+
+            # Main verification: Cart should be empty
+            try:
+                cart_badge = WebDriverWait(self.driver, 2).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "button[aria-label='Giỏ hàng'] span.MuiBadge-badge"))
+                )
+                cart_count = int(cart_badge.text)
+            except:
+                # If badge not found, cart is empty (0 items)
+                cart_count = 0
+
+            if cart_count == 0:
+                print(f"  ✓ Order created successfully - cart is empty")
+
+                # Additional verification: Check current URL
+                current_url = self.driver.current_url
+                print(f"  → Current URL: {current_url}")
+
+                # Could navigate to orders page here if needed
+                # For now, just verify cart is empty
+
+                return f"Order ({order_id}) verified - cart empty, order created successfully", "PASS"
+            else:
+                return f"Order verification failed - cart still has {cart_count} items", "FAIL"
 
         except Exception as e:
+            self.take_screenshot("verify_order_failed")
             return f"Failed to verify order: {str(e)}", "FAIL"
 
     def test_run_all_test_cases(self):

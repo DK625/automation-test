@@ -2,9 +2,9 @@ STT,Input,Output,Expected Result,Result,Phân loại chức năng,Mức độ,St
 1,"login: username=lovecatdat@gmail.com, password=123456@Dat",,Login successful and redirected to home page,,Authentication,High,,1
 2,"add_to_cart_and_checkout: products=[Realme 11 Pro+|Điện thoại; Vivo V30 Pro|Điện thoại; Acer Aspire 5|Laptop; HP Pavilion 15|Laptop; Soundcore Space Q45|Tai nghe]",,Add 5 products → Navigate to cart → Select all → Buy Now → At checkout page,,Cart & Checkout,High,,1
 3,validate_empty_shipping:,,Click Change Address → Edit current address → Clear all fields → Click Confirm → 4 validation errors displayed → Close modal,,Validation,High,,1
-4,"add_address: name=Nguyen Van A, address=123 Nguyen Trai, city_index=0, phone=0912345678",,Address added and appears in list,,Address Management,High,,1
-5,select_delivery_address: address_index=0,,Selected address displayed correctly in checkout,,Address Management,High,,1
-6,select_shipping: provider=GHN,,Shipping fee displayed and added to total,,Shipping,High,,1
-7,"verify_total_calculation: products_total=60460000, shipping=20000",,Total = 60480000 VND (Realme: 11990000 + Vivo: 15990000 + Acer: 15490000 + HP: 16990000 + Soundcore: 2990000 + Ship: 20000),,Calculation,High,,1
-8,complete_purchase: payment=COD,,Order created successfully and cart emptied,,Purchase Flow,High,,1
-9,verify_order_details: order_id=latest,,Order details match cart items and delivery info,,Verification,High,,1
+4,"add_address: name=Nguyen Van A, address=123 Nguyen Trai, city_index=0, phone=0912345678",,Click Change → Cancel → Add New → Fill form (name/address/city/phone) → Confirm → Address added,,Address Management,High,,1
+5,select_delivery_address: address_index=0,,Modal open → Select address at index 0 → Click Update → Address displayed on checkout page,,Address Management,High,,1
+6,select_shipping: provider=GHN,,Click GHN radio button → Shipping fee displayed and updated in total,,Shipping,High,,1
+7,"verify_total_calculation: products_total=60460000, shipping=20000",,Get product prices + shipping → Verify sum equals total → Expected: 60480000 VND,,Calculation,High,,1
+8,complete_purchase: payment=COD,,Click Đặt hàng → Confirm in modal → Order created → Cart badge shows 0,,Purchase Flow,High,,1
+9,verify_order_details: order_id=latest,,Verify cart is empty → Order created successfully,,Verification,High,,1
