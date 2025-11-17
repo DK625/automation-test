@@ -279,17 +279,10 @@ class TestPurchaseWithTemplate:
 
         # STEP 3: Select all products
         print(f"  → Selecting all products in cart")
-        try:
-            select_all_checkbox = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='select-all-checkbox']"))
-            )
-            is_checked = select_all_checkbox.get_attribute('checked')
-            if not is_checked:
-                self.driver.execute_script("arguments[0].click();", select_all_checkbox)
-                time.sleep(1)
-                print(f"  ✓ All products selected")
-        except Exception as e:
-            return f"Failed to select products: {str(e)}", "FAIL"
+        checkboxes = WebDriverWait(self.driver, 35).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiBox-root.css-uz5qc span"))
+        )
+        checkboxes.click()  # Click vào tất cả các checkbox
 
         # STEP 4: Click Buy Now to proceed to checkout
         print(f"  → Clicking 'Buy Now' to proceed to checkout")
