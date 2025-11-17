@@ -1,7 +1,7 @@
 STT,Input,Output,Expected Result,Result,Phân loại chức năng,Mức độ,Status,Round
 1,"login: username=lovecatdat@gmail.com, password=123456@Dat",,Login successful and redirected to home page,,Authentication,High,,1
-2,"add_to_cart: products=[Realme 11 Pro+|Điện thoại, Vivo V30 Pro|Điện thoại, Acer Aspire 5|Laptop, HP Pavilion 15|Laptop, Soundcore Space Q45|Tai nghe]",,Click tabs → Search products → Add to cart (5 products),,Cart Management,High,,1
-3,validate_empty_shipping: all_fields_empty,,All required fields show validation errors,,Validation,High,,1
+2,"add_to_cart_and_checkout: products=[Realme 11 Pro+|Điện thoại, Vivo V30 Pro|Điện thoại, Acer Aspire 5|Laptop, HP Pavilion 15|Laptop, Soundcore Space Q45|Tai nghe]",,Add 5 products → Navigate to cart → Select all → Buy Now → At checkout page,,Cart & Checkout,High,,1
+3,validate_empty_shipping:,,Click Đặt hàng → Modal opens → Submit empty form → 4 validation errors displayed,,Validation,High,,1
 4,"add_address: name=Nguyen Van A, address=123 Nguyen Trai, city_index=0, phone=0912345678",,Address added and appears in list,,Address Management,High,,1
 5,select_delivery_address: address_index=0,,Selected address displayed correctly in checkout,,Address Management,High,,1
 6,select_shipping: provider=GHN,,Shipping fee displayed and added to total,,Shipping,High,,1

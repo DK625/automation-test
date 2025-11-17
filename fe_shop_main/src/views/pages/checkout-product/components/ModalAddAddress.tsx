@@ -352,6 +352,9 @@ const ModalAddAddress = (props: TModalAddAddress) => {
                           placeholder={t('Enter_your_full_name')}
                           error={Boolean(errors?.fullName)}
                           helperText={errors?.fullName?.message}
+                          FormHelperTextProps={{
+                            'data-testid': 'error-fullName'
+                          }}
                         />
                       )}
                       name='fullName'
@@ -467,7 +470,7 @@ const ModalAddAddress = (props: TModalAddAddress) => {
                 >
                   {t('Cancel')}
                 </Button>
-                <Button type='submit' variant='contained' sx={{ mt: 3, mb: 2 }}>
+                <Button data-testid="submit-address-form" type='submit' variant='contained' sx={{ mt: 3, mb: 2 }}>
                   {t('Confirm')}
                 </Button>
               </Box>

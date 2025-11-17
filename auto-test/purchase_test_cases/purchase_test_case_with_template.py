@@ -104,8 +104,8 @@ class TestPurchaseWithTemplate:
             if action == 'login':
                 return self.execute_login(params)
 
-            elif action == 'add_to_cart':
-                return self.execute_add_to_cart(params)
+            elif action == 'add_to_cart_and_checkout':
+                return self.execute_add_to_cart_and_checkout(params)
 
             elif action == 'validate_empty_shipping':
                 return self.execute_validate_empty_shipping(params)
@@ -203,9 +203,16 @@ class TestPurchaseWithTemplate:
             print(f"  ✗ Search failed: {str(e)}")
             raise
 
-    def execute_add_to_cart(self, params):
+    def execute_add_to_cart_and_checkout(self, params):
         """
-        Execute add to cart for multiple products
+        Add products to cart AND navigate to checkout page
+
+        This combined action:
+        1. Adds multiple products to cart (from home page)
+        2. Navigates to /my-cart
+        3. Selects all products
+        4. Clicks Buy Now → navigates to /checkout-product
+
         Format: products=[Product1|Tab1, Product2|Tab2, ...]
         """
         products_str = params.get('products', '')
@@ -214,11 +221,8 @@ class TestPurchaseWithTemplate:
             return "No products specified", "FAIL"
 
         # Parse products: "[iPhone 15|Điện thoại, Samsung|Điện thoại]"
-        # Remove brackets
         products_str = products_str.strip('[]')
 
-        # Split by comma (but need to handle commas in product names)
-        # Better: split by pipe first
         product_list = []
         for item in products_str.split(','):
             item = item.strip()
@@ -233,15 +237,7 @@ class TestPurchaseWithTemplate:
 
         print(f"  → Adding {len(product_list)} products to cart")
 
-        # Get initial cart count
-        try:
-            initial_count = int(WebDriverWait(self.driver, 5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBadge-badge"))
-            ).text)
-        except:
-            initial_count = 0
-
-        # Add each product
+        # STEP 1: Add products to cart
         added_count = 0
         for product in product_list:
             try:
@@ -270,39 +266,128 @@ class TestPurchaseWithTemplate:
                 print(f"  ✗ Failed to add {product['name']}: {str(e)}")
                 continue
 
-        # Verify cart count
-        try:
-            final_count = int(WebDriverWait(self.driver, 5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, ".MuiBadge-badge"))
-            ).text)
-        except:
-            final_count = initial_count
-
-        if final_count == initial_count + added_count:
-            return f"Added {added_count} products, cart count: {initial_count} → {final_count}", "PASS"
-        else:
-            return f"Cart count mismatch: expected {initial_count + added_count}, got {final_count}", "FAIL"
-
-    def execute_validate_empty_shipping(self, params):
-        """Validate that empty shipping fields show errors"""
-        # Navigate to cart and checkout
+        # STEP 2: Navigate to cart page
+        print(f"  → Navigating to cart page")
         self.driver.get("http://14.225.44.169:3000/my-cart")
         time.sleep(2)
 
-        # Click "Buy now" button without filling shipping info
+        # STEP 3: Select all products
+        print(f"  → Selecting all products in cart")
+        try:
+            select_all_checkbox = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='select-all-checkbox']"))
+            )
+            is_checked = select_all_checkbox.get_attribute('checked')
+            if not is_checked:
+                self.driver.execute_script("arguments[0].click();", select_all_checkbox)
+                time.sleep(1)
+                print(f"  ✓ All products selected")
+        except Exception as e:
+            return f"Failed to select products: {str(e)}", "FAIL"
+
+        # STEP 4: Click Buy Now to proceed to checkout
+        print(f"  → Clicking 'Buy Now' to proceed to checkout")
         try:
             buy_button = WebDriverWait(self.driver, 10).until(
                 EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Buy') or contains(., 'Mua')]"))
             )
             buy_button.click()
+            time.sleep(2)
+        except Exception as e:
+            return f"Failed to click Buy Now: {str(e)}", "FAIL"
+
+        # STEP 5: Verify navigation to checkout page
+        if "checkout" in self.driver.current_url:
+            print(f"  ✓ Successfully navigated to checkout page")
+            return f"Added {added_count} products and navigated to checkout page", "PASS"
+        else:
+            return f"Failed to navigate to checkout page. Current URL: {self.driver.current_url}", "FAIL"
+
+    def execute_validate_empty_shipping(self, params):
+        """
+        Validate form when submitting empty address fields
+
+        Assumes: Already on /checkout-product page (from previous test)
+
+        Flow:
+        1. Click "Đặt hàng" (no address exists)
+        2. Modal "Add Address" opens automatically
+        3. Click "Submit" without filling form
+        4. Check for 4 validation errors
+
+        Why important:
+        - Ensures user can't checkout without required info
+        - Displays helpful error messages
+        - Prevents invalid orders
+        """
+        try:
+            # Verify we're on checkout page
+            if "checkout" not in self.driver.current_url:
+                return "Not on checkout page. Run add_to_cart_and_checkout first!", "FAIL"
+
+            print("  → On checkout page, clicking 'Đặt hàng' without address")
+            # Click "Đặt hàng" button (should open Add Address modal since no address exists)
+            order_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Đặt hàng') or contains(., 'Order')]"))
+            )
+            order_button.click()
+            time.sleep(1)
+
+            # Modal should open - click Submit without filling form
+            print("  → Modal opened, clicking Submit without filling form")
+            submit_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='submit-address-form']"))
+            )
+            submit_button.click()
             time.sleep(1)
 
             # Check for validation errors
-            # This is a placeholder - need actual frontend error selectors
-            return "Validation errors displayed for empty fields", "PASS"
+            print("  → Checking for validation errors")
+            errors_found = []
+
+            # Check fullName error
+            try:
+                fullname_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-fullName']")
+                if fullname_error.is_displayed():
+                    errors_found.append(f"fullName: {fullname_error.text}")
+            except:
+                pass
+
+            # Check address error
+            try:
+                address_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-address']")
+                if address_error.is_displayed():
+                    errors_found.append(f"address: {address_error.text}")
+            except:
+                pass
+
+            # Check city error
+            try:
+                city_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-city']")
+                if city_error.is_displayed():
+                    errors_found.append(f"city: {city_error.text}")
+            except:
+                pass
+
+            # Check phoneNumber error
+            try:
+                phone_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-phoneNumber']")
+                if phone_error.is_displayed():
+                    errors_found.append(f"phoneNumber: {phone_error.text}")
+            except:
+                pass
+
+            if len(errors_found) >= 4:  # All 4 required fields should show errors
+                print(f"  ✓ Found {len(errors_found)} validation errors:")
+                for error in errors_found:
+                    print(f"    - {error}")
+                return f"All required field validation errors displayed ({len(errors_found)} errors)", "PASS"
+            else:
+                return f"Expected 4 validation errors, found {len(errors_found)}: {errors_found}", "FAIL"
 
         except Exception as e:
-            return f"Could not validate empty shipping: {str(e)}", "FAIL"
+            self.take_screenshot("validate_empty_shipping_failed")
+            return f"Error validating empty shipping: {str(e)}", "FAIL"
 
     def execute_add_address(self, params):
         """Add a delivery address"""
