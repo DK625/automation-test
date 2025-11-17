@@ -307,82 +307,90 @@ class TestPurchaseWithTemplate:
         Validate form when submitting empty address fields
 
         Assumes: Already on /checkout-product page (from previous test)
+        Assumes: User already has an address in database
 
-        Flow:
-        1. Click "Đặt hàng" (no address exists)
-        2. Modal "Add Address" opens automatically
-        3. Click "Submit" without filling form
-        4. Check for 4 validation errors
+        Flow (matching purchase_test_cases.py):
+        1. Click "Change Address" button to open modal
+        2. Click on current address to edit it
+        3. Clear all input fields
+        4. Click "Confirm" to trigger validation errors
+        5. Verify 4 validation errors appear
+        6. Close the modal
 
         Why important:
-        - Ensures user can't checkout without required info
+        - Ensures user can't save empty address fields
         - Displays helpful error messages
-        - Prevents invalid orders
+        - Prevents invalid address data
         """
         try:
             # Verify we're on checkout page
             if "checkout" not in self.driver.current_url:
                 return "Not on checkout page. Run add_to_cart_and_checkout first!", "FAIL"
 
-            print("  → On checkout page, clicking 'Đặt hàng' without address")
-            # Click "Đặt hàng" button (should open Add Address modal since no address exists)
-            order_button = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Đặt hàng') or contains(., 'Order')]"))
+            print("  → On checkout page, clicking 'Change Address' button")
+            # Click "Change Address" button (text button)
+            change_address_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiButton-text"))
             )
-            order_button.click()
+            self.driver.execute_script("arguments[0].click();", change_address_button)
             time.sleep(1)
 
-            # Modal should open - click Submit without filling form
-            print("  → Modal opened, clicking Submit without filling form")
-            submit_button = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "[data-testid='submit-address-form']"))
+            # Click on current address to edit it
+            print("  → Clicking on current address to edit")
+            edit_address_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, "form>div>div>div>button"))
             )
-            submit_button.click()
+            edit_address_button.click()
+            time.sleep(1)
+
+            # Clear all input fields
+            print("  → Clearing all input fields")
+            input_fields = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, "input.MuiInputBase-input"))
+            )
+
+            for i, field in enumerate(input_fields):
+                field.clear()
+                field.click()
+                field.send_keys(Keys.CONTROL + "a")
+                field.send_keys(Keys.DELETE)
+
+                # Add invalid data to last field (phone) to trigger validation
+                if i == len(input_fields) - 1:
+                    field.send_keys("2")
+
+            # Click confirm to trigger validation errors
+            print("  → Clicking Confirm to trigger validation")
+            confirm_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, ".css-1uimnmd-MuiButtonBase-root-MuiButton-root"))
+            )
+            confirm_button.click()
             time.sleep(1)
 
             # Check for validation errors
             print("  → Checking for validation errors")
-            errors_found = []
+            error_messages = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".MuiFormHelperText-root.Mui-error"))
+            )
 
-            # Check fullName error
-            try:
-                fullname_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-fullName']")
-                if fullname_error.is_displayed():
-                    errors_found.append(f"fullName: {fullname_error.text}")
-            except:
-                pass
+            actual_errors = [message.text for message in error_messages if message.is_displayed()]
 
-            # Check address error
-            try:
-                address_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-address']")
-                if address_error.is_displayed():
-                    errors_found.append(f"address: {address_error.text}")
-            except:
-                pass
-
-            # Check city error
-            try:
-                city_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-city']")
-                if city_error.is_displayed():
-                    errors_found.append(f"city: {city_error.text}")
-            except:
-                pass
-
-            # Check phoneNumber error
-            try:
-                phone_error = self.driver.find_element(By.CSS_SELECTOR, "[data-testid='error-phoneNumber']")
-                if phone_error.is_displayed():
-                    errors_found.append(f"phoneNumber: {phone_error.text}")
-            except:
-                pass
-
-            if len(errors_found) >= 4:  # All 4 required fields should show errors
-                print(f"  ✓ Found {len(errors_found)} validation errors:")
-                for error in errors_found:
+            if len(actual_errors) >= 4:  # All 4 required fields should show errors
+                print(f"  ✓ Found {len(actual_errors)} validation errors:")
+                for error in actual_errors:
                     print(f"    - {error}")
-                return f"All required field validation errors displayed ({len(errors_found)} errors)", "PASS"
+
+                # Close the modal
+                print("  → Closing modal")
+                close_button = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".iconify--material-symbols-light > path"))
+                )
+                close_button.click()
+                time.sleep(1)
+
+                return f"All validation errors displayed ({len(actual_errors)} errors): {actual_errors}", "PASS"
             else:
-                return f"Expected 4 validation errors, found {len(errors_found)}: {errors_found}", "FAIL"
+                return f"Expected 4 validation errors, found {len(actual_errors)}: {actual_errors}", "FAIL"
 
         except Exception as e:
             self.take_screenshot("validate_empty_shipping_failed")
