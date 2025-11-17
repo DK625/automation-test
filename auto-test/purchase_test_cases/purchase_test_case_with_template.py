@@ -567,12 +567,11 @@ class TestPurchaseWithTemplate:
         2. Verify shipping fee is displayed
 
         Params:
-        - provider: Shipping provider name (e.g., "GHN", "GHTK", "Shopee")
+        - provider: Shipping provider name (e.g., "GHN", "GHTK")
 
-        Note: In the test, they use nth-child selector or name attribute
+        Note: In the database, only GHN and GHTK are available
         - GHTK = first option (default)
-        - Shopee = second option (.MuiFormControlLabel-root:nth-child(2))
-        - GHN = third option (name="radio-delivery-group")
+        - GHN = second option (name="radio-delivery-group")
         """
         provider = params.get('provider', '').upper()
 
@@ -580,18 +579,19 @@ class TestPurchaseWithTemplate:
             print(f"  → Selecting shipping provider: {provider}")
 
             # Map provider to selector
-            if provider == "SHOPEE":
-                # Click second radio button
-                shipping_radio = WebDriverWait(self.driver, 10).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiFormControlLabel-root:nth-child(2) .PrivateSwitchBase-input"))
-                )
-            elif provider == "GHN" or provider == "GHTK":
-                # Click radio button by name attribute
+            if provider == "GHN":
+                # Click GHN radio button (second option)
                 shipping_radio = WebDriverWait(self.driver, 10).until(
                     EC.element_to_be_clickable((By.NAME, "radio-delivery-group"))
                 )
+            elif provider == "GHTK":
+                # Click GHTK radio button (first option, default)
+                shipping_radio = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiFormControlLabel-root:nth-child(1) .PrivateSwitchBase-input"))
+                )
             else:
-                # Default: select first option
+                # Default: select first option (GHTK)
+                print(f"  ⚠ Unknown provider '{provider}', defaulting to GHTK")
                 shipping_radio = WebDriverWait(self.driver, 10).until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, ".MuiFormControlLabel-root:nth-child(1) .PrivateSwitchBase-input"))
                 )
