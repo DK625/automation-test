@@ -5,6 +5,6 @@ STT,Input,Output,Expected Result,Result,Phân loại chức năng,Mức độ,St
 4,"add_address: name=Nguyen Van A, address=123 Nguyen Trai, city_index=0, phone=0912345678",,Click Change → Cancel → Add New → Fill form (name/address/city/phone) → Confirm → Address added,,Address Management,High,,1
 5,select_delivery_address: address_index=1,,Modal open → Select address at index 1 (newly added) → Click Update → Address displayed on checkout page,,Address Management,High,,1
 6,select_shipping: provider=GHN,,Click GHN radio button → Shipping fee displayed and updated in total,,Shipping,High,,1
-7,"verify_total_calculation: products_total=60460000, shipping=20000",,Get product prices + shipping → Verify sum equals total → Expected: 60480000 VND,,Calculation,High,,1
+7,"verify_total_calculation: products_total=57085000, shipping=20000",,Get product prices + shipping → Verify sum equals total → Expected: 57105000 VND,,Calculation,High,,1
 8,complete_purchase: payment=COD,,Click Đặt hàng → Confirm in modal → Order created → Cart badge shows 0,,Purchase Flow,High,,1
 9,verify_order_details: order_id=latest,,Verify cart is empty → Order created successfully,,Verification,High,,1
