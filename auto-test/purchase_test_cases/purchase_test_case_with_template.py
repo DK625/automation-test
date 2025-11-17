@@ -213,18 +213,18 @@ class TestPurchaseWithTemplate:
         3. Selects all products
         4. Clicks Buy Now → navigates to /checkout-product
 
-        Format: products=[Product1|Tab1, Product2|Tab2, ...]
+        Format: products=[Product1|Tab1; Product2|Tab2; ...]
         """
         products_str = params.get('products', '')
 
         if not products_str:
             return "No products specified", "FAIL"
 
-        # Parse products: "[iPhone 15|Điện thoại, Samsung|Điện thoại]"
+        # Parse products: "[iPhone 15|Điện thoại; Samsung|Điện thoại]"
         products_str = products_str.strip('[]')
 
         product_list = []
-        for item in products_str.split(','):
+        for item in products_str.split(';'):
             item = item.strip()
             if '|' in item:
                 parts = item.split('|')
