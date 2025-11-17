@@ -10,6 +10,12 @@ npm run start
 
 # Datasheet (MongoDB)
 
+run command in shell to dump data into mongodb:
+
+```bash
+mongodump --db test --archive="$(pwd)/backup_test.gz" --gzip
+```
+
 run command in shell to restore data into mongodb:
 
 ```bash

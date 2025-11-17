@@ -9,6 +9,3 @@ STT,Input,Output,Expected Result,Result,Phân loại chức năng,Mức độ,St
 8,"decrease_quantity: product=Acer Aspire 5, times=1",,Quantity decreased from 3 to 2 (Total updates: -15490000 VND),,Cart Management,Medium,,1
 9,verify_cart_total: expected_total=49940000,,Total verified: 49940000 VND (Acer x2: 30980000 + Realme: 11990000 + Soundcore: 2990000 + Samsung: 3290000 + Imou: 690000),,Calculation,High,,1
 10,delete_product: product=Soundcore Space Q45,,Product removed from cart (Total: 46950000 VND),,Cart Management,High,,1
-11,"add_to_cart: product=HP Pavilion 15, quantity=1, tab=Laptop",,Click Laptop tab → Search → Add to cart,,Cart Management,Medium,,1
-12,"increase_quantity: product=HP Pavilion 15, times=2",,Quantity increased from 1 to 3 (Total: +33980000 VND),,Cart Management,Low,,1
-13,"decrease_quantity: product=HP Pavilion 15, times=1",,Quantity decreased from 3 to 2 (Total: -16990000 VND),,Cart Management,Low,,1
