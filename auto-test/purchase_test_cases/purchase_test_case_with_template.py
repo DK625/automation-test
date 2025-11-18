@@ -21,6 +21,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from pymongo import MongoClient
 
 
 class TestPurchaseWithTemplate:
@@ -51,6 +52,17 @@ class TestPurchaseWithTemplate:
         cls.test_failures_dir = "test_failures"
         os.makedirs(cls.test_failures_dir, exist_ok=True)
 
+        # Connect to MongoDB for cleanup/rollback
+        try:
+            cls.mongo_client = MongoClient("mongodb://localhost:27017/")
+            cls.db = cls.mongo_client["test"]
+            cls.users_collection = cls.db["users"]
+            cls.orders_collection = cls.db["orders"]
+            print("MongoDB connection established")
+        except Exception as e:
+            print(f"MongoDB connection error: {str(e)}")
+            cls.mongo_client = None
+
         print(f"\n{'='*60}")
         print(f"Loaded {len(cls.test_cases)} test cases from Google Sheet")
         print(f"Actions: {list(cls.grouped_tests.keys())}")
@@ -59,6 +71,12 @@ class TestPurchaseWithTemplate:
     @classmethod
     def teardown_class(cls):
         """Chạy sau khi tất cả test cases hoàn thành"""
+        # Rollback database changes
+        try:
+            cls.rollback_database_changes()
+        except Exception as e:
+            print(f"Rollback failed: {str(e)}")
+
         # Write results back to Google Sheet
         if cls.result_writer:
             print("\nWriting results back to Google Sheet...")
@@ -78,6 +96,11 @@ class TestPurchaseWithTemplate:
 
         if hasattr(cls, 'driver'):
             cls.driver.quit()
+
+        # Close MongoDB connection
+        if hasattr(cls, 'mongo_client') and cls.mongo_client:
+            cls.mongo_client.close()
+            print("MongoDB connection closed")
 
     def take_screenshot(self, name):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -830,6 +853,100 @@ class TestPurchaseWithTemplate:
 
             # Small delay between tests
             time.sleep(0.5)
+
+    @classmethod
+    def rollback_database_changes(cls):
+        """
+        Rollback database changes made during test execution
+
+        This ensures tests can be run multiple times without side effects:
+        1. Delete the latest order (created in test #8)
+        2. Delete the test address (created in test #4)
+        """
+        if not hasattr(cls, 'mongo_client') or not cls.mongo_client:
+            print("No MongoDB connection, skipping rollback")
+            return
+
+        try:
+            print(f"\n{'='*60}")
+            print("ROLLING BACK DATABASE CHANGES")
+            print(f"{'='*60}")
+
+            # Find user from first test case (login)
+            login_test = next((tc for tc in cls.test_cases if tc['action'] == 'login'), None)
+            if not login_test:
+                print("No login test found, cannot rollback")
+                return
+
+            username = login_test['params'].get('username')
+            if not username:
+                print("No username found in login test")
+                return
+
+            user = cls.users_collection.find_one({"email": username})
+            if not user:
+                print(f"User not found: {username}")
+                return
+
+            print(f"Found user: {username}")
+
+            # 1. Rollback orders (delete latest order created in test)
+            latest_order = cls.orders_collection.find_one(
+                {"user": user['_id']},
+                sort=[("createdAt", -1)]
+            )
+
+            if latest_order:
+                cls.orders_collection.delete_one({"_id": latest_order["_id"]})
+                print(f"✓ Deleted latest order: {latest_order['_id']}")
+            else:
+                print("No orders to delete")
+
+            # 2. Rollback addresses (delete test address created in test #4)
+            # Find test #4 params
+            add_address_test = next((tc for tc in cls.test_cases if tc['action'] == 'add_address'), None)
+            if add_address_test:
+                params = add_address_test['params']
+                test_name = params.get('name', '')
+                test_address = params.get('address', '')
+                test_phone = params.get('phone', '')
+
+                # Split name into firstName and lastName
+                name_parts = test_name.split(' ')
+                if len(name_parts) >= 2:
+                    first_name = ' '.join(name_parts[1:])  # "Van A"
+                    last_name = name_parts[0]  # "Nguyen"
+
+                    # Delete address matching test data
+                    result = cls.users_collection.update_one(
+                        {"_id": user["_id"]},
+                        {"$pull": {
+                            "addresses": {
+                                "address": test_address,
+                                "firstName": first_name,
+                                "lastName": last_name,
+                                "phoneNumber": test_phone
+                            }
+                        }}
+                    )
+
+                    if result.modified_count > 0:
+                        print(f"✓ Deleted test address: {test_name}, {test_address}")
+                    else:
+                        print("No test address found to delete (may have been deleted already)")
+                else:
+                    print(f"Could not parse name: {test_name}")
+            else:
+                print("No add_address test found")
+
+            print(f"{'='*60}")
+            print("ROLLBACK COMPLETED")
+            print(f"{'='*60}\n")
+
+        except Exception as e:
+            print(f"Rollback error: {str(e)}")
+            import traceback
+            traceback.print_exc()
 
 
 if __name__ == "__main__":
