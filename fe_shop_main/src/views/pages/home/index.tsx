@@ -174,6 +174,12 @@ const HomePage: NextPage<TProps> = props => {
     if (!firstRender.current) {
       firstRender.current = true
     }
+    // IMPORTANT: Sync filterBy with current selected filters when changing page
+    setFilterBy({
+      productType: productTypeSelected,
+      minStar: reviewSelected,
+      productLocation: locationSelected
+    })
   }
 
   const handleFilterProduct = (value: string, type: string) => {
