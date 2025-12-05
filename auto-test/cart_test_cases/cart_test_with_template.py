@@ -12,7 +12,7 @@ from utils.sheet_template_parser import (
     TestResultWriter,
     create_test_summary
 )
-from constant.index import CART_TEST_NAME, JSON_NAME
+from constant.index import CART_TEST_NAME, JSON_NAME, SPREEDSHEET_ID
 from datetime import datetime
 
 from selenium import webdriver
@@ -36,7 +36,7 @@ class TestCartWithTemplate:
         # Load data from Google Sheet
         cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
         cls.worksheet = cls.gg_sheet.loadSheet_WorkSheet(
-            "1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY",
+            SPREEDSHEET_ID,
             CART_TEST_NAME
         )
 
@@ -99,6 +99,7 @@ class TestCartWithTemplate:
         action = test_case['action']
         params = test_case['params']
         row_index = test_case['row_index']
+        
 
         try:
             if action == 'login':

@@ -1,6 +1,7 @@
 
 CART_TEST_NAME = "cart_test_cases"
 PURCHASE_TEST_NAME = "purchase_test_cases"
+LOGIN_TEST_CASE = "login_test_cases"
 
 
 GG_SHEET_HEADER = ["Test Name", "Status", "Description"]

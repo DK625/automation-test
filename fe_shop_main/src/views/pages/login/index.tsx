@@ -72,10 +72,11 @@ const LoginPage: NextPage<TProps> = () => {
   const { fcmToken } = useFcmToken();
 
   const schema = yup.object().shape({
-    email: yup.string().required(t('Required_field')).matches(EMAIL_REG, t("Rules_email")),
+    email: yup.string().required(t('Required_field')).max(256, t('Email_max_length_256')).matches(EMAIL_REG, t("Rules_email")),
     password: yup
       .string()
       .required(t('Required_field'))
+      .max(128, t("Max_length_password"))
       .matches(PASSWORD_REG, t("Rules_password"))
   })
 

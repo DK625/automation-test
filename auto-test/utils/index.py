@@ -300,3 +300,15 @@ def log_to_sheet_multi_rows_option(sheet, test_name : str, status: str, details_
     else:
         # if not exist -> add new test case name 
         sheet.append_row([test_name,"","","", details_array[0], status]) # validate more closely 
+
+
+def update_status_result_to_sheet(worksheet, base_col: str, row: int, value_update: list, run_index: int):
+    current_col = chr(ord(base_col.upper()) + run_index - 1)
+    colspan = f"{current_col}{row}"
+
+    worksheet.update(
+        values=[value_update],
+        range_name=colspan
+    )
+
+
