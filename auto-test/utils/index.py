@@ -1,4 +1,5 @@
 from array import array
+import re
 
 # tools 
 def parse_content(key, content):
@@ -310,5 +311,38 @@ def update_status_result_to_sheet(worksheet, base_col: str, row: int, value_upda
         values=[value_update],
         range_name=colspan
     )
+
+
+def get_test_data_from_sheet(worksheet, test_case_rows, test_case_id, col=3):
+    """
+    Get test data from Google Sheet for a specific test case
+    
+    Args:
+        worksheet: Google Sheet worksheet object
+        test_case_rows: Dictionary mapping test case IDs to row numbers
+        test_case_id: Test case ID (e.g., "DMK_9")
+        col: Column number to get data from (default: 3 for column C)
+    
+    Returns:
+        str: Test data value or None if not found
+    """
+    if worksheet:
+        try:
+            row = test_case_rows.get(test_case_id)
+            if row:
+                # Get cell value from specified column
+                cell_value = worksheet.cell(row, col).value
+                if cell_value:
+                    # Remove quotes if present (handles ", ', ", ")
+                    cell_value = re.sub(r'^[\'"“”]+|[\'"“”]+$', '', str(cell_value))
+                    print(f"✓ Test data for {test_case_id}: {cell_value}")
+                    return cell_value
+                else:
+                    print(f"⚠ No test data found for {test_case_id} at row {row}")
+                    return None
+        except Exception as e:
+            print(f"✗ Failed to get test data for {test_case_id}: {e}")
+            return None
+    return None
 
 

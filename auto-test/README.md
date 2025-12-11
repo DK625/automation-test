@@ -376,3 +376,5 @@ dataSheet = {
 Điền các trường trong gg sheet theo đúng mẫu dược sheet (để ý kể cả khoảng trắng)
 
 link sheet : https://docs.google.com/spreadsheets/d/1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY/edit?usp=sharing
+
+pytest reset_password_flow_cases.py::TestResetPasswordFlow::test_dmk_17_new_password_valid (chạy test case cụ thể)
