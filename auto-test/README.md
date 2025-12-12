@@ -376,5 +376,12 @@ dataSheet = {
 Điền các trường trong gg sheet theo đúng mẫu dược sheet (để ý kể cả khoảng trắng)
 
 link sheet : https://docs.google.com/spreadsheets/d/1EEceAh_f_vogtMxTpwHtB9yMggXsXS7DPi28aag4arY/edit?usp=sharing
+copy: https://docs.google.com/spreadsheets/d/1dmwkiGKNizxRBfVph2BnPtRqhus0uYmp2Qq0JDodj6o/edit?gid=0#gid=0
 
+pytest login_flow_cases.py::TestLoginFlow::test_DN_13_nhap_email_thieu_at
 pytest reset_password_flow_cases.py::TestResetPasswordFlow::test_dmk_17_new_password_valid (chạy test case cụ thể)
+
+pytest cart_flow_cases.py::TestCartFlow::test_tvgh_1_check_cart_interface (chạy test case cụ thể)
+
+pytest purchase_flow_cases.py::TestPurchaseFlow::test_mh_1_display_product_list
+$env:RUN_INDEX=2; pytest login_flow_cases.py -v
