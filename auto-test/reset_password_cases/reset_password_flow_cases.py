@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 import os
 import sys
+import requests
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -110,19 +111,39 @@ class TestResetPasswordFlow:
     PASSWORD_OLD = "123456@Dat"
 
     @classmethod
+    def rollback_password(cls):
+        """Rollback password to default for test user"""
+        try:
+            print("\n[ROLLBACK] Resetting password to default...")
+            response = requests.post("http://14.225.44.169:3001/api/rollback/password")
+            if response.status_code == 200:
+                print("[ROLLBACK] ✓ Password rolled back successfully")
+                return True
+            else:
+                print(f"[ROLLBACK] ✗ Failed to rollback password: {response.text}")
+                return False
+        except Exception as e:
+            print(f"[ROLLBACK] ✗ Error calling rollback API: {e}")
+            return False
+
+    @classmethod
     def setup_class(cls):
         """Setup test class - initialize WebDriver and Google Sheet connection"""
         print("\n========== SETUP TEST CLASS ==========")
+
+        # Rollback password before starting tests
+        cls.rollback_password()
+
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument("--start-maximized")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         cls.driver = webdriver.Chrome(options=chrome_options)
         cls.driver.implicitly_wait(10)
-        
+
         # Create screenshot directory if not exists
         if not os.path.exists(cls.test_failures_dir):
             os.makedirs(cls.test_failures_dir)
-        
+
         # Connect to Google Sheet
         cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
         cls.worksheet = cls.gg_sheet.loadSheet_WorkSheet(SPREEDSHEET_ID, RESET_PASSWORD_TEST_CASE)

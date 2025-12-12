@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 import os
 import sys
+import requests
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -96,27 +97,46 @@ class TestPurchaseFlow:
     test_failures_dir = "test_failures"
 
     @classmethod
+    def rollback_purchases(cls):
+        """Rollback addresses to default for test user"""
+        try:
+            print("\n[ROLLBACK] Clearing test addresses...")
+            response = requests.post("http://14.225.44.169:3001/api/rollback/purchase")
+            if response.status_code == 200:
+                print("[ROLLBACK] ✓ Addresses rolled back successfully")
+                return True
+            else:
+                print(f"[ROLLBACK] ✗ Failed to rollback addresses: {response.text}")
+                return False
+        except Exception as e:
+            print(f"[ROLLBACK] ✗ Error calling rollback API: {e}")
+            return False
+
+    @classmethod
     def setup_class(cls):
         """Setup test class - initialize WebDriver and Google Sheet connection"""
         print("\n" + "="*60)
         print("SETUP: Initializing WebDriver and Google Sheet connection")
         print("="*60)
-        
+
+        # Rollback addresses before starting tests
+        cls.rollback_purchases()
+
         # Initialize Chrome WebDriver
         options = webdriver.ChromeOptions()
         options.add_argument('--start-maximized')
         options.add_argument('--disable-blink-features=AutomationControlled')
         cls.driver = webdriver.Chrome(options=options)
         cls.driver.implicitly_wait(10)
-        
+
         # Connect to Google Sheet
         cls.gg_sheet = ConnectGoogleSheet(JSON_NAME)
         cls.worksheet = cls.gg_sheet.loadSheet_WorkSheet(SPREEDSHEET_ID, PURCHASE_TEST_NAME)
-        
+
         # Create directory for test failure screenshots
         if not os.path.exists(cls.test_failures_dir):
             os.makedirs(cls.test_failures_dir)
-        
+
         print("[OK] Setup completed successfully")
 
     @classmethod
